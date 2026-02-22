@@ -5,7 +5,7 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "paths": {
-      "@/plugins/*": ["./src/plugin-adapters/*"]
+      "@/plugins/*": ["./src/plugin-adapters/*.ts"]
     },
 
     // Environment Settings
@@ -44,6 +44,5 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["test/**"]
+  "include": ["src/**/*.ts"]
 }

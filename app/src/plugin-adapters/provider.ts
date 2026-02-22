@@ -1,4 +1,4 @@
-import Registry from '@/plugins/registry.js'
+import Registry from './registry.js'
 
 class Provider extends Registry {
     constructor() {

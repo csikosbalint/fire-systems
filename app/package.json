@@ -9,18 +9,13 @@
   "types": "dist",
   "scripts": {
     "build": "tsc -p .",
-    "lint": "eslint src test --ext .ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:types": "tsc -p tsconfig.test.json --noEmit"
+    "lint": "eslint src --ext .ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^24.1.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
     "eslint": "^10.0.1",
-    "typescript": "^5.9.3",
-    "vitest": "^3.0.0"
+    "typescript": "^5.9.3"
   }
 }
