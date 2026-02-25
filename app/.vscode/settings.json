@@ -1,0 +1,12 @@
+{
+  "eslint.enable": true,
+  "eslint.validate": ["typescript", "typescriptreact"],
+  "eslint.useFlatConfig": true,
+  "[typescript]": {
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.eslint": "explicit"
+    }
+  }
+}

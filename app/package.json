@@ -3,12 +3,26 @@
   "version": "1.0.0",
   "description": "FIRE Application",
   "license": "ISC",
-  "author": "",
+  "author": "Balint Csikos",
   "type": "module",
+  "private": true,
   "main": "dist/index.js",
-  "types": "dist",
+  "exports": {
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./adapters": {
+      "default": "./dist/adapters/index.js",
+      "types": "./dist/adapters/index.d.ts"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc --project .",
     "lint": "eslint src --ext .ts"
   },
   "devDependencies": {

@@ -1,0 +1,11 @@
+{
+  "folders": [
+    {
+      "path": "app",
+    },
+    {
+      "path": "plugins/ui/sharpe",
+    },
+  ],
+  "settings": {},
+}

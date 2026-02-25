@@ -3,15 +3,16 @@
   "compilerOptions": {
     // File Layout
     "rootDir": "./src",
-    "outDir": "./dist",
+    "outDir": "dist",
     "paths": {
-      "@/plugins/*": ["./src/plugin-adapters/*.ts"]
+      "@/*": ["./*"]
     },
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
-    "target": "esnext",
+    // "target": "esnext",
+    "target": "es6",
     "types": [],
     // For nodejs:
     // "lib": ["esnext"],
@@ -44,5 +45,6 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"]
 }
