@@ -12,9 +12,9 @@
       "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./adapters": {
-      "default": "./dist/adapters/index.js",
-      "types": "./dist/adapters/index.d.ts"
+    "./ports": {
+      "default": "./dist/ports/index.js",
+      "types": "./dist/ports/index.d.ts"
     }
   },
   "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc --project .",
+    "build": "rm -rf dist && tsc --project .",
     "lint": "eslint src --ext .ts"
   },
   "devDependencies": {

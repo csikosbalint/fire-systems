@@ -1,22 +1,21 @@
 'use client'
 import { useState } from "react"
-import { Counter } from 'fire-app/adapters'
+import { CounterEvent, counter as counterInteractor } from 'fire-app/ports'
 
-export default function usePlugin() {
+export default function useCounterAdapter() {
     // local model state (react)
     const [counter, setCounter] = useState(0)
     // platform we depend on
-    const counterPlatform = new Counter()
     // subscribe to platform updates
     const callback = (data: unknown) => {
         setCounter(data as number)
     }
-    counterPlatform.subscribe({ event: 'Counter::counterUpdated', callback })
+    counterInteractor.subscribe(CounterEvent.UPDATE, callback)
     
     // export controller and presenter to view
     function useController() {
         function increment() {
-            counterPlatform.increment()
+            counterInteractor.increment()
         }
         return {
             increment,

@@ -1,10 +1,10 @@
 'use client'
 import Image from "next/image"
 import { add } from 'fire-app'
-import usePlugin from "./Plugin";
+import useCounterAdapter from "./adapters/Counter";
 
 export default function Home() {
-  const { useController, usePresenter } = usePlugin();
+  const { useController, usePresenter } = useCounterAdapter();
   const { increment } = useController();
   const { counter, tooBig } = usePresenter();
   const sum = add(1, 2);
