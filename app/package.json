@@ -9,12 +9,12 @@
   "main": "dist/index.js",
   "exports": {
     ".": {
-      "default": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
     },
     "./ports": {
-      "default": "./dist/ports/index.js",
-      "types": "./dist/ports/index.d.ts"
+      "types": "./dist/ports/index.d.ts",
+      "default": "./dist/ports/index.js"
     }
   },
   "types": "./dist/index.d.ts",
@@ -22,7 +22,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc --project .",
+    "build": "tsc --project .",
     "lint": "eslint src --ext .ts",
     "test": "vitest",
     "test:run": "vitest run",
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^25.3.3",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",
     "@vitest/coverage-v8": "^4.0.18",
@@ -38,5 +39,9 @@
     "eslint": "^10.0.1",
     "typescript": "^5.9.3",
     "vitest": "^4.0.18"
+  },
+  "dependencies": {
+    "@railpath/finance-toolkit": "^0.5.4",
+    "awilix": "^13.0.1"
   }
 }

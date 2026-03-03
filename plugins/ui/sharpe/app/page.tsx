@@ -6,7 +6,7 @@ import useCounterAdapter from "./adapters/Counter";
 export default function Home() {
   const { useController, usePresenter } = useCounterAdapter();
   const { increment } = useController();
-  const { counter, tooBig } = usePresenter();
+  const { counter, tooBig, mySharpe, mySharpeError } = usePresenter();
   const sum = add(1, 2);
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -24,7 +24,7 @@ export default function Home() {
             {sum} {counter} To get started, edit the page.tsx file.
           </h1>
           <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+            { mySharpeError ? `Error: ${mySharpeError}` : `MySharpe: ${mySharpe}` } Looking for a starting point or more instructions? Head over to{" "}
             <a
               href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
               className="font-medium text-zinc-950 dark:text-zinc-50"

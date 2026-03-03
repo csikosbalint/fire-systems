@@ -1,16 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Counter } from '../../src/interactors/Counter.js'
-import { CounterEvent } from '../../src/ports/ICounter.js'
+import { CounterEventNames } from '../../src/ports/events.js'
 import type { IEventBus } from '../../src/shared/IEventBus.js'
 import { createMockEventBus } from '../helpers/mocks.js'
 
 describe('Counter Interactor', () => {
   let counter: Counter
   let mockEventBus: IEventBus
+  let mockLogger: { info: ReturnType<typeof vi.fn> }
 
   beforeEach(() => {
     mockEventBus = createMockEventBus()
-    counter = new Counter(mockEventBus)
+    mockLogger = { info: vi.fn() }
+    counter = new Counter({ eventBus: mockEventBus, logger: mockLogger as never })
   })
 
   it('should initialize with count of 0', () => {
@@ -29,7 +31,7 @@ describe('Counter Interactor', () => {
 
   it('should register subscriptions with correct namespace', () => {
     const callback = vi.fn()
-    counter.subscribe(CounterEvent.UPDATE, callback)
+    counter.subscribe(CounterEventNames.UPDATE, callback)
 
     expect(mockEventBus.subscribe).toHaveBeenCalledWith('Counter::update', callback)
   })
@@ -37,7 +39,7 @@ describe('Counter Interactor', () => {
   it('should use injected EventBus via dependency injection', () => {
     const customEventBus = createMockEventBus()
 
-    const customCounter = new Counter(customEventBus)
+    const customCounter = new Counter({ eventBus: customEventBus, logger: mockLogger as never })
     customCounter.increment()
 
     expect(customEventBus.publish).toHaveBeenCalled()
@@ -46,7 +48,7 @@ describe('Counter Interactor', () => {
 
   it('should maintain separate state for different instances', () => {
     const mockEventBus2 = createMockEventBus()
-    const counter2 = new Counter(mockEventBus2)
+    const counter2 = new Counter({ eventBus: mockEventBus2, logger: mockLogger as never })
 
     counter.increment()
     counter.increment()

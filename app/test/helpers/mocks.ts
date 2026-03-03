@@ -2,6 +2,17 @@ import { vi } from 'vitest'
 import type { IEventBus } from '../../src/shared/IEventBus.js'
 
 /**
+ * Creates a mock Logger for testing
+ */
+export function createMockLogger() {
+  return {
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
+  }
+}
+
+/**
  * Creates a mock EventBus for testing
  */
 export function createMockEventBus(): IEventBus {
@@ -29,11 +40,4 @@ export function createSpyEventBus(): IEventBus {
       events.get(event)?.push(callback)
     }),
   }
-}
-
-/**
- * Helper to wait for async operations in tests
- */
-export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }

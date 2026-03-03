@@ -1,22 +1,22 @@
 'use client'
 import { useState } from "react"
-import { CounterEvent, counter as counterInteractor } from 'fire-app/ports'
+import { CounterEventNames, useCounterPort, useMySharpePort } from 'fire-app/ports'
 
 export default function useCounterAdapter() {
-    // local model state (react)
-    const [counter, setCounter] = useState(0)
     // platform we depend on
+    const { counter: initialCounter, increment, subscribe } = useCounterPort()
+    const { mySharpe, mySharpeError } = useMySharpePort({ data: [1,2,3,4,5], ticker: 'AAPL', lookback: 2 })
+    // local model state (react)
+    const [counter, setCounter] = useState(initialCounter)
+    
     // subscribe to platform updates
     const callback = (data: unknown) => {
         setCounter(data as number)
     }
-    counterInteractor.subscribe(CounterEvent.UPDATE, callback)
+    subscribe(CounterEventNames.UPDATE, callback)
     
     // export controller and presenter to view
     function useController() {
-        function increment() {
-            counterInteractor.increment()
-        }
         return {
             increment,
         }
@@ -25,6 +25,8 @@ export default function useCounterAdapter() {
         return {
             counter,
             tooBig: counter > 5,
+            mySharpe,
+            mySharpeError,
         }
     }
     return {

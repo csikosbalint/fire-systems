@@ -1,15 +1,59 @@
+import { asClass, createContainer, InjectionMode, Lifetime } from 'awilix'
 import { Counter } from '../interactors/Counter.js'
 import { EventBus } from '../shared/EventBus.js'
-import type { ICounter } from './ICounter.js'
-import { CounterEvent } from './ICounter.js'
+import { Validator } from '../entities/Validator.js'
+import { Logger } from '../shared/Logger.js'
+import { CounterEventNames, MySharpeEventNames } from './events.js'
+import MySharpeFactory from '../interactors/MySharpeFactory.js'
+import type { HistoricalData } from './types.js'
 
-const eventBus = new EventBus()
-export type{
-    ICounter,
+export {
+    CounterEventNames,
+    MySharpeEventNames,
+}
+
+const container = createContainer({
+    injectionMode: InjectionMode.PROXY,
+    strict: true,
+})
+container.register({
+    // shared
+    eventBus: asClass(EventBus, { lifetime: Lifetime.SINGLETON }),
+    logger: asClass(Logger, { lifetime: Lifetime.SINGLETON }),
+    // entities
+    validator: asClass(Validator, { lifetime: Lifetime.SINGLETON }),
+    // interactors
+    counter: asClass(Counter, { lifetime: Lifetime.SINGLETON }),
+    mySharpeFactory: asClass(MySharpeFactory, { lifetime: Lifetime.SINGLETON }),
+})
+// export ports
+const useCounterPort = () => {
+    // using interactor(s)
+    const counter = container.resolve('counter') as Counter
+    return {
+        counter: counter.getCount(),
+        increment: counter.increment.bind(counter),
+        subscribe: counter.subscribe.bind(counter),
+
+    }
+}
+const useMySharpePort = ({ ticker, data, lookback }: { ticker: string, data: HistoricalData[], lookback: number }) => {
+    // using interactor(s)
+    const mySharpeFactory = container.resolve('mySharpeFactory') as MySharpeFactory
+    let mySharpe
+    let mySharpeError
+    try {
+        mySharpe = mySharpeFactory.create({ ticker, data: data, lookback })
+    } catch (error) {
+        mySharpeError = error
+    }
+    return {
+        mySharpe,
+        mySharpeError
+    }
 }
 
 export {
-    CounterEvent,
+    useCounterPort,
+    useMySharpePort,
 }
-
-export const counter = new Counter(eventBus)
