@@ -1,7 +1,7 @@
 'use client'
 
-import TickerList from './TickerList'
 import TickerDetails from './TickerDetails'
+import TickerList from './TickerList'
 
 export default function TickerLayout() {
   return (
