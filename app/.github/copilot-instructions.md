@@ -12,6 +12,7 @@
 - Keep functions small and focused; favor clarity over cleverness.
 - Reuse existing utilities or adapters instead of adding duplicates.
 - Add concise comments only when logic is non-obvious.
+- Use Next.js provided layouts, nested layouts, and dynamic segments.
 
 ## Changes and safety
 

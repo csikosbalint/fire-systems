@@ -1,0 +1,43 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Next.js: Full Stack (Server + Chrome)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "npm run dev",
+      "cwd": "${workspaceFolder}",
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "${workspaceFolder}/node_modules/fire-app/**",
+        "${workspaceFolder}/../../../app/**"
+      ],
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Chrome: Client (fire-app maps)",
+        "pattern": "- Local:\\s+(https?://.+)"
+      },
+      "skipFiles": ["<node_internals>/**"]
+    },
+    {
+      "name": "Chrome: Client (fire-app maps)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack-internal:///(app-pages-browser)/./*": "${workspaceFolder}/*",
+        "webpack-internal:///(app-pages-browser)/../../../app/*": "${workspaceFolder}/../../../app/*",
+        "webpack-internal:///(ssr)/./*": "${workspaceFolder}/*",
+        "webpack-internal:///(ssr)/../../../app/*": "${workspaceFolder}/../../../app/*",
+        "/Users/johnnym/Code/fire-systems/plugins/ui/src/*": "${workspaceFolder}/../../../app/src/*",
+        "/Users/johnnym/Code/fire-systems/plugins/src/*": "${workspaceFolder}/../../../app/src/*"
+      },
+      "presentation": {
+        "hidden": true
+      }
+    }
+  ]
+}
