@@ -32,6 +32,28 @@
 - Place shadcn/ui primitives in `components/ui/` (managed by shadcn CLI)
 - Use descriptive, semantic component names (e.g., `TickerLayout`, `TickerList`, `TickerDetails`)
 
+### Adapter pattern (REQUIRED)
+- **Every new component MUST have a corresponding adapter**
+- Adapters are placed in `app/adapters/` with the same name as the component
+- Adapter structure follows the hook pattern with controller and presenter separation:
+  ```typescript
+  export default function use[ComponentName]Adapter() {
+    const useController = () => {
+      // State management and data fetching logic
+    }
+    const usePresenter = () => {
+      // Presentation logic and formatting
+    }
+    return {
+      useController,
+      usePresenter,
+    }
+  }
+  ```
+- **Controller** handles: state management, data fetching, business logic
+- **Presenter** handles: data formatting, user interaction handlers, presentation logic
+- Adapters separate business logic from presentation, enabling better testability and maintainability
+
 ### Styling and layout
 - **Primary layout approach**: Use Tailwind CSS utility classes with flex/grid layouts
 - Prefer flex for responsive layouts (e.g., `flex flex-col lg:flex-row` for portrait→landscape)
@@ -54,6 +76,7 @@
 
 ### File organization
 - Keep related components together
+- Each component in `app/components/` should have a corresponding adapter in `app/adapters/`
 - Use index exports when exporting multiple items from a directory
 - Follow Next.js App Router conventions:
   - `page.tsx` for route pages
@@ -87,6 +110,12 @@
   - Style with Tailwind utilities
 
 ## Architecture patterns
+
+### Adapter pattern
+- **Controller-Presenter separation**: All components use adapters to separate business logic from UI
+- **Location**: Adapters live in `app/adapters/` and match component names
+- **Purpose**: Enables testability, maintainability, and clear separation of concerns
+- Controllers manage state and data; presenters handle formatting and user interactions
 
 ### Current implementation
 - **Two-column responsive layout**: TickerList (left/top) and TickerDetails (right/bottom)

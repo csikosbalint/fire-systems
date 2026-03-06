@@ -1,26 +1,12 @@
 'use client'
-
-import { useState } from 'react'
+import useTickerListAdapter from '@adapters/TickerList'
 import TickerInputSection from './TickerInputSection'
 import TickerTable from './TickerTable'
 
-interface Ticker {
-  isin: string
-  name: string
-  price?: number
-}
-
 export default function TickerList() {
-  const [tickers, setTickers] = useState<Ticker[]>([])
-
-  const handleAddTicker = (newTicker: { isin: string; name: string }) => {
-    // Check for duplicates
-    const exists = tickers.some((t) => t.isin === newTicker.isin)
-    if (!exists) {
-      setTickers([...tickers, { ...newTicker }])
-    }
-  }
-
+  const { useController, usePresenter } = useTickerListAdapter()
+  const { tickers } = usePresenter()
+  const { addTicker, searchByISIN } = useController()
   return (
     <div className="space-y-6">
       {/* Title Section */}
@@ -32,7 +18,7 @@ export default function TickerList() {
       </div>
 
       {/* Input Section */}
-      <TickerInputSection onAddTicker={handleAddTicker} />
+      <TickerInputSection add={addTicker} search={searchByISIN}/>
 
       {/* Table Section */}
       <TickerTable tickers={tickers} />

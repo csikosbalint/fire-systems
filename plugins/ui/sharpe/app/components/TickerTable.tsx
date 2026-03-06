@@ -1,3 +1,5 @@
+'use client'
+import { Ticker } from '@types/Ticker'
 import {
   Table,
   TableBody,
@@ -5,19 +7,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from '@ui/table'
 
-interface Ticker {
-  isin: string
-  name: string
-  price?: number
-}
-
-interface TickerTableProps {
-  tickers: Ticker[]
-}
-
-export default function TickerTable({ tickers }: TickerTableProps) {
+export default function TickerTable({ tickers } : { tickers: Ticker[] }) {
   if (tickers.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-8 text-center">

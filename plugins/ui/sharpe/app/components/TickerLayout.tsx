@@ -1,5 +1,3 @@
-'use client'
-
 import TickerDetails from './TickerDetails'
 import TickerList from './TickerList'
 
