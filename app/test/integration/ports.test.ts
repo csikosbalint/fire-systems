@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, useCounterPort, useMySharpePort, HistoricalData, useHistoricalDataRetrieverPort } from '@ports/index.js'
+import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, useCounterPort, useMySharpePort, useHistoricalDataRetrieverPort } from '../../src/ports/index'
 import testdata from '../fixtures/test.json'
+import { HistoricalData } from '../../src/ports/types'
 
 describe('Counter', () => {
   it('should expose counter port to an adapter, and increase counter', () => {
@@ -32,19 +33,30 @@ describe('MySharpe', () => {
   })
 })
 
-describe('HistoricalDataRetrieverFactory', () => {
-  it('should create HistoricalDataRetriever instance', () => {
-    const { retriever, retrieverError } = useHistoricalDataRetrieverPort({ ticker: 'AAPL' })
-    expect(retrieverError).toBeUndefined()
-    expect(retriever).toBeDefined()
-    retriever.subscribe(HistoricalDataEventNames.COMPLETED, (eventData: HistoricalData) => {
-      const data = (eventData as unknown as { data: HistoricalData[] }).data
-      expect(data).toBeDefined()
-      // today
-      const today = data.find((d: HistoricalData) => d.date === '11-14-2013')
-      expect(today).toBeDefined()
-      expect(today?.sharpeRatio).toBeCloseTo(3.06, 1)
+describe('HistoricalDataRetrieverFactory', async () => {
+  it('should create HistoricalDataRetriever instance and download historical data', () => {
+    return new Promise<void>((resolve, reject) => {
+      const { retriever, retrieverError } = useHistoricalDataRetrieverPort({ ticker: 'AAPL' })
+      expect(retrieverError).toBeUndefined()
+      expect(retriever).toBeDefined()
+      retriever.subscribe(HistoricalDataEventNames.COMPLETED, (eventData: HistoricalData) => {
+        const data = (eventData as unknown as { data: HistoricalData[] }).data
+        expect(data).toBeDefined()
+        // today
+        const today = data.find((d: HistoricalData) => d.date === '2026-03-05')
+        expect(today).toBeDefined()
+        expect(today?.close).toBeCloseTo(260.29, 1)
+        resolve()
+      })
+      retriever.subscribe(HistoricalDataEventNames.ERROR, (eventData: unknown) => {
+        const error = (eventData as unknown as { error: string }).error
+        expect(error).toBeUndefined()
+        reject()
+      })
+      retriever.retrieve({
+        startDate: new Date('2026-01-01'),
+        endDate: new Date('2026-03-06'),
+      })
     })
-    retriever.retrieve()
   })
 })

@@ -56,10 +56,11 @@ const useMySharpePort = ({ ticker, data, lookback }: { ticker: string, data: His
     }
 }
 
-const useHistoricalDataRetrieverPort = ({ ticker }: { ticker: string }) => {
+const useHistoricalDataRetrieverPort = ({ ticker }: { ticker: string }): { retriever?: ReturnType<HistoricalDataFactory['create']> 
+| undefined, retrieverError?: unknown } => {
     const historicalDataFactory = container.resolve('historicalDataFactory') as HistoricalDataFactory
-    let retriever
-    let retrieverError
+    let retriever: ReturnType<HistoricalDataFactory['create']> | undefined
+    let retrieverError: unknown
     try {
         retriever = historicalDataFactory.create({ ticker })
     } catch (error) {
