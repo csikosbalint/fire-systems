@@ -3,7 +3,7 @@
 import { Plus } from 'lucide-react'
 import { Button } from '@ui/button'
 import { Input } from '@ui/input'
-import type { Ticker } from '@types/Ticker'
+import type { Ticker } from '@shared/Ticker'
 import { useState } from 'react'
 
 export default function TickerInputSection({
@@ -21,6 +21,7 @@ export default function TickerInputSection({
     setIsin(value)
     const found = search(value)
     if ( found ) setTickerFound(found)
+    else setTickerFound(null)
   }
 
   const handleAddClick = () => {

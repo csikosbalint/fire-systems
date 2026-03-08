@@ -4,8 +4,12 @@
     // File Layout
     "rootDir": "./src",
     "outDir": "dist",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"]
+      "@shared/*": ["./src/shared/*"],
+      "@interactors/*": ["./src/interactors/*"],
+      "@entities/*": ["./src/entities/*"],
+      "@ports/*": ["./src/ports/*"]
     },
 
     // Environment Settings

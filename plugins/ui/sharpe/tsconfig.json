@@ -19,9 +19,10 @@
       }
     ],
     "paths": {
+      "@/lib/*": ["./lib/*"],
       "@adapters/*": ["./app/adapters/*"],
       "@components/*": ["./app/components/*"],
-      "@types/*": ["./app/types/*"],
+      "@shared/*": ["./app/shared/*"],
       "@utils/*": ["./app/utils/*"],
       "@ui/*": ["./components/ui/*"]
     }

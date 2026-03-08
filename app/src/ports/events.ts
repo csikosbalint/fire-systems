@@ -9,3 +9,8 @@ export const MySharpeEventNames = {
   ...EventBase,
   COMPLETED: 'completed',
 } as const
+
+export const HistoricalDataEventNames = {
+  ...EventBase,
+  COMPLETED: 'completed',
+} as const

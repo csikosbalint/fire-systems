@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Ticker } from '../types/Ticker'
+import { Ticker } from '@shared/Ticker'
 
 // Placeholder ticker lookup logic - will be replaced with real API call later
 const placeholderLookup: Record<string, string> = {

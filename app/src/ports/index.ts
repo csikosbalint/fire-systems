@@ -3,13 +3,15 @@ import { Counter } from '../interactors/Counter.js'
 import { EventBus } from '../shared/EventBus.js'
 import { Validator } from '../entities/Validator.js'
 import { Logger } from '../shared/Logger.js'
-import { CounterEventNames, MySharpeEventNames } from './events.js'
+import { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames } from './events.js'
 import MySharpeFactory from '../interactors/MySharpeFactory.js'
 import type { HistoricalData } from './types.js'
+import HistoricalDataFactory from '@interactors/HistoricalDataFactory.js'
 
 export {
     CounterEventNames,
     MySharpeEventNames,
+    HistoricalDataEventNames,
 }
 
 const container = createContainer({
@@ -25,6 +27,7 @@ container.register({
     // interactors
     counter: asClass(Counter, { lifetime: Lifetime.SINGLETON }),
     mySharpeFactory: asClass(MySharpeFactory, { lifetime: Lifetime.SINGLETON }),
+    historicalDataFactory: asClass(HistoricalDataFactory, { lifetime: Lifetime.SINGLETON }),
 })
 // export ports
 const useCounterPort = () => {
@@ -53,7 +56,23 @@ const useMySharpePort = ({ ticker, data, lookback }: { ticker: string, data: His
     }
 }
 
+const useHistoricalDataRetrieverPort = ({ ticker }: { ticker: string }) => {
+    const historicalDataFactory = container.resolve('historicalDataFactory') as HistoricalDataFactory
+    let retriever
+    let retrieverError
+    try {
+        retriever = historicalDataFactory.create({ ticker })
+    } catch (error) {
+        retrieverError = error
+    }
+    return {
+        retriever,
+        retrieverError,
+    }
+}
+
 export {
     useCounterPort,
     useMySharpePort,
+    useHistoricalDataRetrieverPort,
 }

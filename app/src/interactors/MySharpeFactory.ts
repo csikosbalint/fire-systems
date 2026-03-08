@@ -1,18 +1,8 @@
-import { MySharpe } from '../entities/MySharpe.js'
-import { Logger } from '../shared/Logger.js'
-import type { HistoricalData } from '../ports/types.js'
-import type { IEventBus } from '../shared/IEventBus.js'
+import { MySharpe } from '@entities/MySharpe.js'
+import type { HistoricalData } from '@ports/types.js'
+import FactoryBase from '@shared/FactoryBase.js'
 
-export default class MySharpeFactory {
-    private eventBus: IEventBus
-    private logger: Logger
-    constructor({ eventBus, logger }: { eventBus: IEventBus, logger: Logger }) {
-        this.eventBus = eventBus
-        this.logger = logger
-
-        this.logger.info('MySharpeFactory initialized')
-        
-    }
+export default class MySharpeFactory extends FactoryBase {
 
     create({ ticker, data, lookback = 250 }: {
         ticker: string, data: HistoricalData[], lookback?: number

@@ -1,5 +1,5 @@
 'use client'
-import { Ticker } from '@types/Ticker'
+import { Ticker } from '@shared/Ticker'
 import {
   Table,
   TableBody,
