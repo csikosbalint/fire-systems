@@ -1,30 +1,40 @@
 import { useState } from 'react'
 import { Ticker } from '@shared/Ticker'
-
-// Placeholder ticker lookup logic - will be replaced with real API call later
-const placeholderLookup: Record<string, string> = {
-  US0378331005: 'Apple Inc.',
-  US5949181045: 'Microsoft Corporation',
-  US02079K3059: 'Alphabet Inc. Class A',
-  US88160R1014: 'Tesla Inc.',
-  US0231351067: 'Amazon.com Inc.',
-}
+import {
+  HistoricalDataEventNames,
+  useHistoricalDataRetrieverPort,
+} from 'fire-app/ports'
 
 export default function useTickerListAdapter() {
   const [tickers, setTickers] = useState<Ticker[]>([])
+  const [found, setFound] = useState<Ticker | null>(null)
+  const { retriever } = useHistoricalDataRetrieverPort()
 
   const useController = () => {
-    const searchByISIN = (isin: string): Ticker | null => {
-      const name = placeholderLookup[isin.toUpperCase()]
-      return name ? { isin, name } : null
+    const search = (keyword: string): void => {
+      setFound(null) // Clear previous search result
+      retriever.search(keyword)
     }
 
-    const addTicker = (ticker: Ticker) => {
+    const addTicker = (ticker: Ticker): void => {
       setTickers((prev) => [...prev, ticker])
     }
 
+    retriever.subscribe(
+      HistoricalDataEventNames.FOUND,
+      (eventData: unknown) => {
+        const ticker = (eventData as unknown as { ticker: string }).ticker
+        setFound({ isin: ticker, name: '' }) // Replace '' with actual name if available
+      }
+    )
+
+    retriever.subscibe(HistoricalDataEventNames.NOT_FOUND, () => {
+      console.log('Ticker not found')
+    })
+
     return {
-      searchByISIN,
+      search,
+      found,
       addTicker,
     }
   }

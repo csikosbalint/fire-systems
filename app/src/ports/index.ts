@@ -6,7 +6,7 @@ import { Logger } from '../shared/Logger.js'
 import { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames } from './events.js'
 import MySharpeFactory from '../interactors/MySharpeFactory.js'
 import type { HistoricalData } from './types.js'
-import HistoricalDataFactory from '@interactors/HistoricalDataFactory.js'
+import { HistoricalDataRetriever } from '@entities/HistoricalDataRetriever.js'
 
 export {
     CounterEventNames,
@@ -27,7 +27,7 @@ container.register({
     // interactors
     counter: asClass(Counter, { lifetime: Lifetime.SINGLETON }),
     mySharpeFactory: asClass(MySharpeFactory, { lifetime: Lifetime.SINGLETON }),
-    historicalDataFactory: asClass(HistoricalDataFactory, { lifetime: Lifetime.SINGLETON }),
+    historicalDataRetriever: asClass(HistoricalDataRetriever, { lifetime: Lifetime.SINGLETON }),
 })
 // export ports
 const useCounterPort = () => {
@@ -56,19 +56,11 @@ const useMySharpePort = ({ ticker, data, lookback }: { ticker: string, data: His
     }
 }
 
-const useHistoricalDataRetrieverPort = ({ ticker }: { ticker: string }): { retriever?: ReturnType<HistoricalDataFactory['create']> 
-| undefined, retrieverError?: unknown } => {
-    const historicalDataFactory = container.resolve('historicalDataFactory') as HistoricalDataFactory
-    let retriever: ReturnType<HistoricalDataFactory['create']> | undefined
-    let retrieverError: unknown
-    try {
-        retriever = historicalDataFactory.create({ ticker })
-    } catch (error) {
-        retrieverError = error
-    }
+const useHistoricalDataRetrieverPort = (): { retriever?: HistoricalDataRetriever, retrieverError?: unknown } => {
+    const historicalDataRetriever = container.resolve('historicalDataRetriever') as HistoricalDataRetriever
+    let retriever: HistoricalDataRetriever | undefined = historicalDataRetriever
     return {
         retriever,
-        retrieverError,
     }
 }
 

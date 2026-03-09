@@ -11,23 +11,21 @@ export default function TickerInputSection({
   search,
 }: {
   add: (ticker: Ticker) => void
-  search: (isin: string) => Ticker | null
+  search: (isin: string) => void
 }) {
-  const [isinTyped, setIsin] = useState('')
+  const [keyword, setKeyword] = useState('')
   const [tickerFound, setTickerFound] = useState<Ticker | null>(null)
 
   const handleIsinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase()
-    setIsin(value)
-    const found = search(value)
-    if ( found ) setTickerFound(found)
-    else setTickerFound(null)
+    setKeyword(value)
+    search(value)
   }
 
   const handleAddClick = () => {
     if (tickerFound) {
       add(tickerFound)
-      setIsin('')
+      setKeyword('')
       setTickerFound(null)
     }
   }
@@ -40,11 +38,10 @@ export default function TickerInputSection({
 
   return (
     <div className="grid grid-cols-6 gap-3 items-center">
-      {/* ISIN Input - 2/6 width */}
       <Input
         type="text"
         placeholder="Enter ISIN..."
-        value={ isinTyped }
+        value={ keyword }
         onChange={handleIsinChange}
         onKeyDown={handleKeyDown}
         className="col-span-2"
@@ -65,7 +62,7 @@ export default function TickerInputSection({
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
-            {isinTyped ? 'Enter valid ISIN (12 characters)' : 'No ticker selected'}
+            {keyword ? 'Enter valid ISIN (12 characters)' : 'No ticker selected'}
           </p>
         )}
       </div>
@@ -73,7 +70,7 @@ export default function TickerInputSection({
       {/* Add Button - 1/6 width */}
       <Button
         onClick={handleAddClick}
-        disabled={!isinTyped || !tickerFound}
+        disabled={!keyword || !tickerFound}
         className="col-span-1"
         size="icon"
       >
