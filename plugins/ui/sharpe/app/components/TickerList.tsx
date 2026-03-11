@@ -18,7 +18,7 @@ export default function TickerList() {
       </div>
 
       {/* Input Section */}
-      <TickerInputSection add={addTicker} search={search}/>
+      <TickerInputSection add={addTicker} search={search} />
 
       {/* Table Section */}
       <TickerTable tickers={tickers} />

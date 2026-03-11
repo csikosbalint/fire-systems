@@ -10,13 +10,13 @@ export default function TickerInputSection({
   add,
   search,
 }: {
-  add: (ticker: Ticker) => void
-  search: (isin: string) => void
+    add: (ticker: Ticker) => void
+    search: (keyword: string) => void
 }) {
   const [keyword, setKeyword] = useState('')
   const [tickerFound, setTickerFound] = useState<Ticker | null>(null)
 
-  const handleIsinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase()
     setKeyword(value)
     search(value)
@@ -42,7 +42,7 @@ export default function TickerInputSection({
         type="text"
         placeholder="Enter ISIN..."
         value={ keyword }
-        onChange={handleIsinChange}
+        onChange={handleSearchChange}
         onKeyDown={handleKeyDown}
         className="col-span-2"
         maxLength={12}
