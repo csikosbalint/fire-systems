@@ -1,8 +1,9 @@
-import type { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames } from './events.js'
+import type { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames, SearchEventNames } from './events.js'
 
 export type CounterEvent = typeof CounterEventNames[keyof typeof CounterEventNames];
 export type MySharpeEvent = typeof MySharpeEventNames[keyof typeof MySharpeEventNames];
 export type HistoricalDataEvent = typeof HistoricalDataEventNames[keyof typeof HistoricalDataEventNames];
+export type SearchEvent = typeof SearchEventNames[keyof typeof SearchEventNames];
 
 export type HistoricalData = {
   date: string;

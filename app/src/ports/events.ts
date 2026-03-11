@@ -16,3 +16,9 @@ export const HistoricalDataEventNames = {
   FOUND: 'found',
   NOT_FOUND: 'notfound',
 } as const
+
+export const SearchEventNames = {
+  ...EventBase,
+  FOUND: 'found',
+  NOT_FOUND: 'notfound',
+} as const

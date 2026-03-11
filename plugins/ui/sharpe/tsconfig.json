@@ -20,6 +20,7 @@
     ],
     "paths": {
       "@/lib/*": ["./lib/*"],
+      "@actions/*": ["./app/actions/*"],
       "@adapters/*": ["./app/adapters/*"],
       "@components/*": ["./app/components/*"],
       "@shared/*": ["./app/shared/*"],

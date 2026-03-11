@@ -3,15 +3,17 @@ import { Counter } from '../interactors/Counter.js'
 import { EventBus } from '../shared/EventBus.js'
 import { Validator } from '../entities/Validator.js'
 import { Logger } from '../shared/Logger.js'
-import { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames } from './events.js'
+import { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames, SearchEventNames } from './events.js'
 import MySharpeFactory from '../interactors/MySharpeFactory.js'
 import type { HistoricalData } from './types.js'
 import { HistoricalDataRetriever } from '@entities/HistoricalDataRetriever.js'
+import { TickerSearch } from '@interactors/TickerSearch.js'
 
 export {
     CounterEventNames,
     MySharpeEventNames,
     HistoricalDataEventNames,
+    SearchEventNames,
 }
 
 const container = createContainer({
@@ -28,6 +30,7 @@ container.register({
     counter: asClass(Counter, { lifetime: Lifetime.SINGLETON }),
     mySharpeFactory: asClass(MySharpeFactory, { lifetime: Lifetime.SINGLETON }),
     historicalDataRetriever: asClass(HistoricalDataRetriever, { lifetime: Lifetime.SINGLETON }),
+    tickerSearch: asClass(TickerSearch, { lifetime: Lifetime.SINGLETON }),
 })
 // export ports
 const useCounterPort = () => {
@@ -64,8 +67,17 @@ const useHistoricalDataRetrieverPort = (): { retriever?: HistoricalDataRetriever
     }
 }
 
+const useTickerSearchPort = () => {
+    const tickerSearch = container.resolve('tickerSearch') as TickerSearch
+    return {
+        searchTicker: tickerSearch.search.bind(tickerSearch),
+        subscribe: tickerSearch.subscribe.bind(tickerSearch),
+    }
+}
+
 export {
     useCounterPort,
     useMySharpePort,
     useHistoricalDataRetrieverPort,
+    useTickerSearchPort,
 }

@@ -1,7 +1,7 @@
 type Ticker = {
   isin: string
   name: string
-  price?: number
+  ticker: string
 }
 
 export type { Ticker }

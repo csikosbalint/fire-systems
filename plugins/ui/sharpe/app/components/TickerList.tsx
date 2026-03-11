@@ -5,8 +5,8 @@ import TickerTable from './TickerTable'
 
 export default function TickerList() {
   const { useController, usePresenter } = useTickerListAdapter()
-  const { tickers } = usePresenter()
-  const { addTicker, search } = useController()
+  const { tickers, found } = usePresenter()
+  const { keywordChange, tickerAdd } = useController()
   return (
     <div className="space-y-6">
       {/* Title Section */}
@@ -18,7 +18,7 @@ export default function TickerList() {
       </div>
 
       {/* Input Section */}
-      <TickerInputSection add={addTicker} search={search} />
+      <TickerInputSection add={tickerAdd} search={keywordChange} found={found} />
 
       {/* Table Section */}
       <TickerTable tickers={tickers} />

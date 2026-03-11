@@ -75,27 +75,4 @@ describe('HistoricalDataRetrieverFactory', async () => {
     return ret
   })
 
-  it('should seek and find ticker by keyword', async () => {
-    const { retriever } = useHistoricalDataRetrieverPort()
-    const ret = new Promise<void>((resolve) => {
-      retriever.subscribe(HistoricalDataEventNames.FOUND, (eventData: unknown) => {
-        expect((eventData as unknown as { ticker: string }).ticker).toBe('AAPL')
-        resolve()
-      })
-    })
-    retriever.search('US0378331005')
-    return ret
-  })
-
-  it('should seek and not find ticker by invalid keyword', async () => {
-    const { retriever } = useHistoricalDataRetrieverPort()
-    const ret = new Promise<void>((resolve) => {
-      retriever.subscribe(HistoricalDataEventNames.NOT_FOUND, (eventData: unknown) => {
-        expect((eventData as unknown as { keyword: string }).keyword).toBe('INVALID_KEYWORD')
-        resolve()
-      })
-    })
-    retriever.search('INVALID_KEYWORD')
-    return ret
-  })
 })

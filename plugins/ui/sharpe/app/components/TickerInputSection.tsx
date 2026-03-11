@@ -9,12 +9,13 @@ import { useState } from 'react'
 export default function TickerInputSection({
   add,
   search,
+  found,
 }: {
     add: (ticker: Ticker) => void
     search: (keyword: string) => void
+    found: Ticker | null
 }) {
   const [keyword, setKeyword] = useState('')
-  const [tickerFound, setTickerFound] = useState<Ticker | null>(null)
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase()
@@ -23,10 +24,10 @@ export default function TickerInputSection({
   }
 
   const handleAddClick = () => {
-    if (tickerFound) {
-      add(tickerFound)
+    if (found) {
+      add(found)
       setKeyword('')
-      setTickerFound(null)
+      search('') // Clear search result after adding
     }
   }
 
@@ -50,15 +51,15 @@ export default function TickerInputSection({
 
       {/* Found Ticker Name Label - 3/6 width */}
       <div className="col-span-3">
-        {tickerFound ? (
+        {found ? (
           <p
             className={`text-sm ${
-              tickerFound === null
+              found === null
                 ? 'text-destructive'
                 : 'text-foreground font-medium'
             }`}
           >
-            {tickerFound ? tickerFound.name : 'Ticker not found'}
+            {found ? found.name : 'Ticker not found'}
           </p>
         ) : (
           <p className="text-sm text-muted-foreground">
@@ -70,7 +71,7 @@ export default function TickerInputSection({
       {/* Add Button - 1/6 width */}
       <Button
         onClick={handleAddClick}
-        disabled={!keyword || !tickerFound}
+        disabled={!keyword || !found}
         className="col-span-1"
         size="icon"
       >

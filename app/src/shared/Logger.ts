@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 export class Logger {
     private readonly isDev = process.env.NODE_ENV === 'development'
 
