@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, useCounterPort, useMySharpePort, useHistoricalDataRetrieverPort } from '../../src/ports/index'
+import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, SearchEventNames, useCounterPort, useMySharpePort, useHistoricalDataRetrieverPort, useTickerSearchPort } from '../../src/ports/index'
 import testdata from '../fixtures/test.json'
 import { HistoricalData } from '../../src/ports/types'
 
@@ -75,4 +75,26 @@ describe('HistoricalDataRetrieverFactory', async () => {
     return ret
   })
 
+})
+
+describe('TickerSearch', () => {
+  it('should expose tickerSearch port to an adapter, search for a ticker, and return results', () => {
+    const { searchTicker, subscribe } = useTickerSearchPort()
+    expect(searchTicker).toBeDefined()
+    expect(subscribe).toBeDefined()
+
+    const ret = new Promise<void>((resolve) => {
+      subscribe(SearchEventNames.FOUND, (eventData: unknown) => {
+        const result = eventData as { quotes: { symbol: string }[] }
+        expect(result).toBeDefined()
+        expect(result.quotes).toBeDefined()
+        const aapl = result.quotes.find((q) => q.symbol === 'AAPL')
+        expect(aapl).toBeDefined()
+        resolve()
+      })
+    })
+
+    searchTicker('AAPL')
+    return ret
+  })
 })
