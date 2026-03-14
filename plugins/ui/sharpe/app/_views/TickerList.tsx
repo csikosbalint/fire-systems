@@ -1,12 +1,10 @@
 'use client'
-import useTickerListAdapter from '@adapters/TickerList'
-import TickerInputSection from './TickerInputSection'
-import TickerTable from './TickerTable'
+import useTickerListModels from '@models/TickerList'
+import TickerTable from './components/TickerTable'
+import TickerInputSection from './components/TickerInputSection'
 
 export default function TickerList() {
-  const { useController, usePresenter } = useTickerListAdapter()
-  const { tickers, found } = usePresenter()
-  const { keywordChange, tickerAdd } = useController()
+  const { tickers, found, addTicker, doSearch } = useTickerListModels()
   return (
     <div className="space-y-6">
       {/* Title Section */}
@@ -18,7 +16,7 @@ export default function TickerList() {
       </div>
 
       {/* Input Section */}
-      <TickerInputSection add={tickerAdd} search={keywordChange} found={found} />
+      <TickerInputSection add={(ticker) => addTicker({ ticker })} search={doSearch} found={found} />
 
       {/* Table Section */}
       <TickerTable tickers={tickers} />

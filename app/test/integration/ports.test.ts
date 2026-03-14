@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, SearchEventNames, useCounterPort, useMySharpePort, useHistoricalDataRetrieverPort, useTickerSearchPort } from '../../src/ports/index'
+import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, SearchEventNames, useCounterPort, useMySharpePort, historicalDataPort, tickerSearchPort } from '../../src/ports/index'
 import testdata from '../fixtures/test.json'
 import { HistoricalData } from '../../src/ports/types'
 
@@ -35,10 +35,10 @@ describe('MySharpe', () => {
 
 describe('HistoricalDataRetrieverFactory', async () => {
   it('should create HistoricalDataRetriever instance and download historical data', () => {
-    const { retriever } = useHistoricalDataRetrieverPort()
-    expect(retriever).toBeDefined()
+    const { retrieve, subscribe } = historicalDataPort()
+    expect(retrieve).toBeDefined()
     const ret = new Promise<void>((resolve) => {
-      retriever.subscribe(HistoricalDataEventNames.COMPLETED, (eventData: HistoricalData) => {
+      subscribe(HistoricalDataEventNames.COMPLETED, (eventData: HistoricalData) => {
         const data = (eventData as unknown as { data: HistoricalData[] }).data
         expect(data).toBeDefined()
         // today
@@ -49,7 +49,7 @@ describe('HistoricalDataRetrieverFactory', async () => {
         resolve()
       })
     })
-    retriever.retrieve({
+    retrieve({
       ticker: 'AAPL',
       startDate: new Date('2026-01-01'),
       endDate: new Date('2026-03-06'),
@@ -58,16 +58,16 @@ describe('HistoricalDataRetrieverFactory', async () => {
   })
 
   it('should handle error when downloading historical data', async () => {
-    const { retriever } = useHistoricalDataRetrieverPort()
-    expect(retriever).toBeDefined()
+    const { retrieve, subscribe } = historicalDataPort()
+    expect(retrieve).toBeDefined()
     const ret = new Promise<void>((resolve) => {
-      retriever.subscribe(HistoricalDataEventNames.ERROR, (eventData: unknown) => {
+      subscribe(HistoricalDataEventNames.ERROR, (eventData: unknown) => {
         const error = (eventData as unknown as { error: unknown }).error
         expect(error).toBeDefined()
         resolve()
       })
     })
-    retriever.retrieve({
+    retrieve({
       ticker: 'INVALID_TICKER',
       startDate: new Date('2026-01-01'),
       endDate: new Date('2026-03-06'),
@@ -79,8 +79,8 @@ describe('HistoricalDataRetrieverFactory', async () => {
 
 describe('TickerSearch', () => {
   it('should expose tickerSearch port to an adapter, search for a ticker, and return results', () => {
-    const { searchTicker, subscribe } = useTickerSearchPort()
-    expect(searchTicker).toBeDefined()
+    const { search, subscribe } = tickerSearchPort()
+    expect(search).toBeDefined()
     expect(subscribe).toBeDefined()
 
     const ret = new Promise<void>((resolve) => {
@@ -94,7 +94,7 @@ describe('TickerSearch', () => {
       })
     })
 
-    searchTicker('AAPL')
+    search('AAPL')
     return ret
   })
 })

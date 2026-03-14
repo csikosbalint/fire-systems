@@ -18,14 +18,17 @@
         "name": "next"
       }
     ],
+    "baseUrl": "./",
     "paths": {
       "@/lib/*": ["./lib/*"],
-      "@actions/*": ["./app/actions/*"],
-      "@adapters/*": ["./app/adapters/*"],
-      "@components/*": ["./app/components/*"],
-      "@shared/*": ["./app/shared/*"],
-      "@utils/*": ["./app/utils/*"],
-      "@ui/*": ["./components/ui/*"]
+      "@models/*": ["app/_models/*"],
+      "@views/*": ["app/_views/*"],
+      "@adapters/*": ["app/_adapters/*"],
+      "@components/*": ["app/components/*"],
+      "@shared/*": ["app/shared/*"],
+      "@utils/*": ["app/utils/*"],
+      "@ui/*": ["components/ui/*"],
+      "@/*": ["./*"]
     }
   },
   "include": [

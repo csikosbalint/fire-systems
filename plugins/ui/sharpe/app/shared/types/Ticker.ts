@@ -1,7 +1,8 @@
 type Ticker = {
-  isin: string
+  market: string
   name: string
   ticker: string
+  sharpe?: number
 }
 
 export type { Ticker }

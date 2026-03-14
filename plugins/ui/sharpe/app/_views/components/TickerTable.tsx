@@ -1,5 +1,5 @@
-'use client'
-import { Ticker } from '@shared/Ticker'
+import { Ticker } from '@shared/types/Ticker'
+import { Skeleton } from '@ui/skeleton'
 import {
   Table,
   TableBody,
@@ -25,22 +25,22 @@ export default function TickerTable({ tickers } : { tickers: Ticker[] }) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>ISIN</TableHead>
-            <TableHead>Ticker Name</TableHead>
-            <TableHead className="text-right">Price</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Symbol</TableHead>
+            <TableHead>Name</TableHead>
+            <TableHead className="text-right">Market</TableHead>
+            <TableHead className="text-right">Sharpe</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickers.map((ticker) => (
-            <TableRow key={ticker.isin}>
-              <TableCell className="font-mono text-sm">{ticker.isin}</TableCell>
+          {tickers.map((ticker,index) => (
+            <TableRow key={index}>
+              <TableCell className="font-mono text-sm">{ticker.ticker}</TableCell>
               <TableCell>{ticker.name}</TableCell>
               <TableCell className="text-right text-muted-foreground">
-                {ticker.price ? `$${ticker.price.toFixed(2)}` : '—'}
+                {ticker.market}
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
-                —
+                { ticker?.sharpe ? ticker.sharpe.toFixed(2) :  <Skeleton className="h-4 w-full" /> }
               </TableCell>
             </TableRow>
           ))}

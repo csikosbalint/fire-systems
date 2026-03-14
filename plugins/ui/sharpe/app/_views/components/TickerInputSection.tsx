@@ -3,7 +3,7 @@
 import { Plus } from 'lucide-react'
 import { Button } from '@ui/button'
 import { Input } from '@ui/input'
-import type { Ticker } from '@shared/Ticker'
+import type { Ticker } from '@shared/types/Ticker'
 import { useState } from 'react'
 
 export default function TickerInputSection({

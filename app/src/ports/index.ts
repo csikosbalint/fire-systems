@@ -59,18 +59,18 @@ const useMySharpePort = ({ ticker, data, lookback }: { ticker: string, data: His
     }
 }
 
-const useHistoricalDataRetrieverPort = (): { retriever?: HistoricalDataRetriever, retrieverError?: unknown } => {
+const historicalDataPort = () => {
     const historicalDataRetriever = container.resolve('historicalDataRetriever') as HistoricalDataRetriever
-    let retriever: HistoricalDataRetriever | undefined = historicalDataRetriever
     return {
-        retriever,
+        retrieve: historicalDataRetriever.retrieve.bind(historicalDataRetriever),
+        subscribe: historicalDataRetriever.subscribe.bind(historicalDataRetriever),
     }
 }
 
-const useTickerSearchPort = () => {
+const tickerSearchPort = () => {
     const tickerSearch = container.resolve('tickerSearch') as TickerSearch
     return {
-        searchTicker: tickerSearch.search.bind(tickerSearch),
+        search: tickerSearch.search.bind(tickerSearch),
         subscribe: tickerSearch.subscribe.bind(tickerSearch),
     }
 }
@@ -78,6 +78,6 @@ const useTickerSearchPort = () => {
 export {
     useCounterPort,
     useMySharpePort,
-    useHistoricalDataRetrieverPort,
-    useTickerSearchPort,
+    historicalDataPort,
+    tickerSearchPort,
 }

@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 
 export default function useThemeToggleAdapter() {
@@ -23,7 +21,9 @@ export default function useThemeToggleAdapter() {
       localStorage.setItem('theme', next ? 'dark' : 'light')
     }
 
-    return { toggle }
+    return {
+      toggle,
+    }
   }
 
   const usePresenter = () => {
@@ -33,5 +33,8 @@ export default function useThemeToggleAdapter() {
     }
   }
 
-  return { useController, usePresenter }
+  return {
+    useController,
+    usePresenter,
+  }
 }

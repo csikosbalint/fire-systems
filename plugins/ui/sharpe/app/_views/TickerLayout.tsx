@@ -1,6 +1,6 @@
-import TickerDetails from './TickerDetails'
-import TickerList from './TickerList'
-import ThemeToggle from './ThemeToggle'
+import ThemeToggle from "@views/ThemeToggle"
+import TickerDetails from "@views/TickerDetails"
+import TickerList from "@views/TickerList"
 
 export default function TickerLayout() {
   return (
