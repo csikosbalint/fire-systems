@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Ticker } from '@shared/types/Ticker'
 import { search, download } from '@adapters/server/TickerRead'
+import { mysharpe } from '@adapters/browser/QuoteCalculator'
 
 export default function useTickerListModels() {
   // models for the view
@@ -9,9 +10,12 @@ export default function useTickerListModels() {
 
   const addTicker = async ({ ticker }: { ticker: Ticker }): Promise<void> => {
     download({ ticker })
-      .then((data) => {
-        console.log('Downloaded data for ticker:', data)
-      })
+      .then((data) =>
+        mysharpe({
+          data,
+          lookback: 252,
+        })
+      )
       .catch((e) => {
         console.error('Error downloading data for ticker:', e)
       })

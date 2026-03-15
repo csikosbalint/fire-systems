@@ -1,17 +1,24 @@
-import { IndicatorNames, type Indicators } from '@shared/consts/Enhance'
+'use client'
 
-export async function enhance({
+import {
+  EnrichmentEventNames,
+  HistoricalData,
+  mySharpePort,
+} from 'fire-app/ports'
+
+export async function mysharpe({
   data,
-  with: indicator,
+  lookback,
 }: {
-  data: object[]
-  with: Indicators
+  data: HistoricalData[]
+  lookback: number
 }) {
-  switch (indicator) {
-    case IndicatorNames.SHARPE:
-      break
-
-    default:
-      break
-  }
+  const { subscribe, augment } = mySharpePort()
+  subscribe(EnrichmentEventNames.COMPLETED, (result) => {
+    console.log('Enrichment completed with result:', result)
+  })
+  augment({
+    data,
+    lookback,
+  })
 }

@@ -1,11 +1,12 @@
 'use server'
 import { Ticker } from '@shared/types/Ticker'
 import {
+  HistoricalData,
   HistoricalDataEventNames,
-  historicalDataPort,
   SearchEventNames,
-  tickerSearchPort,
 } from 'fire-app/ports'
+
+import { tickerSearchPort, historicalDataPort } from 'fire-app/ports/server'
 
 export async function search(keyword: string): Promise<Ticker | null> {
   const { search, subscribe } = tickerSearchPort()
@@ -39,16 +40,16 @@ export async function download({
   ticker,
 }: {
   ticker: Ticker
-}): Promise<object> {
+}): Promise<HistoricalData[]> {
   const { subscribe, retrieve } = historicalDataPort()
   const startDate = new Date()
   startDate.setFullYear(startDate.getFullYear() - 1) // 1 year ago
   const endDate = new Date()
 
-  const ret = new Promise<object[]>((resolve, reject) => {
+  const ret = new Promise<HistoricalData[]>((resolve, reject) => {
     subscribe(HistoricalDataEventNames.COMPLETED, (data) => {
       console.log('Historical data retrieved:', data)
-      resolve(data as object[])
+      resolve(data as HistoricalData[])
     })
     subscribe(HistoricalDataEventNames.ERROR, (error) => {
       console.error('Error retrieving historical data:', error)

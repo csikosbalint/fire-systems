@@ -1,37 +1,23 @@
-import { asClass, createContainer, InjectionMode, Lifetime } from 'awilix'
+import type { MySharpe } from '@entities/MySharpe.js'
 import { Counter } from '../interactors/Counter.js'
-import { EventBus } from '../shared/EventBus.js'
-import { Validator } from '../entities/Validator.js'
-import { Logger } from '../shared/Logger.js'
-import { CounterEventNames, HistoricalDataEventNames, MySharpeEventNames, SearchEventNames } from './events.js'
-import MySharpeFactory from '../interactors/MySharpeFactory.js'
-import type { HistoricalData } from './types.js'
-import { HistoricalDataRetriever } from '@entities/HistoricalDataRetriever.js'
-import { TickerSearch } from '@interactors/TickerSearch.js'
+import getContainer from '@shared/Container.js'
 
+//export event names
 export {
     CounterEventNames,
     MySharpeEventNames,
     HistoricalDataEventNames,
     SearchEventNames,
-}
+    EnrichmentNames,
+    EnrichmentEventNames,
+} from './events.js'
+// export types
+export type {
+    HistoricalData,
+    Enrichments
+} from './types.js'
 
-const container = createContainer({
-    injectionMode: InjectionMode.PROXY,
-    strict: true,
-})
-container.register({
-    // shared
-    eventBus: asClass(EventBus, { lifetime: Lifetime.SINGLETON }),
-    logger: asClass(Logger, { lifetime: Lifetime.SINGLETON }),
-    // entities
-    validator: asClass(Validator, { lifetime: Lifetime.SINGLETON }),
-    // interactors
-    counter: asClass(Counter, { lifetime: Lifetime.SINGLETON }),
-    mySharpeFactory: asClass(MySharpeFactory, { lifetime: Lifetime.SINGLETON }),
-    historicalDataRetriever: asClass(HistoricalDataRetriever, { lifetime: Lifetime.SINGLETON }),
-    tickerSearch: asClass(TickerSearch, { lifetime: Lifetime.SINGLETON }),
-})
+const container = getContainer()
 // export ports
 const useCounterPort = () => {
     // using interactor(s)
@@ -43,41 +29,33 @@ const useCounterPort = () => {
 
     }
 }
-const useMySharpePort = ({ ticker, data, lookback }: { ticker: string, data: HistoricalData[], lookback: number }) => {
-    // using interactor(s)
-    const mySharpeFactory = container.resolve('mySharpeFactory') as MySharpeFactory
-    let mySharpe
-    let mySharpeError
-    try {
-        mySharpe = mySharpeFactory.create({ ticker, data: data, lookback })
-    } catch (error) {
-        mySharpeError = error
-    }
+const mySharpePort = () => {
+    const mySharpe = container.resolve('mySharpe') as MySharpe
     return {
-        mySharpe,
-        mySharpeError
+        augment: mySharpe.augment.bind(mySharpe),
+        subscribe: mySharpe.subscribe.bind(mySharpe),
     }
 }
 
-const historicalDataPort = () => {
-    const historicalDataRetriever = container.resolve('historicalDataRetriever') as HistoricalDataRetriever
-    return {
-        retrieve: historicalDataRetriever.retrieve.bind(historicalDataRetriever),
-        subscribe: historicalDataRetriever.subscribe.bind(historicalDataRetriever),
-    }
-}
+// const historicalDataPort = () => {
+//     const quoteRetriever = container.resolve('quoteRetriever') as QuoteRetriever
+//     return {
+//         retrieve: quoteRetriever.retrieve.bind(quoteRetriever),
+//         subscribe: quoteRetriever.subscribe.bind(quoteRetriever),
+//     }
+// }
 
-const tickerSearchPort = () => {
-    const tickerSearch = container.resolve('tickerSearch') as TickerSearch
-    return {
-        search: tickerSearch.search.bind(tickerSearch),
-        subscribe: tickerSearch.subscribe.bind(tickerSearch),
-    }
-}
+// const tickerSearchPort = () => {
+//     const tickerSearch = container.resolve('tickerSearch') as TickerSearch
+//     return {
+//         search: tickerSearch.search.bind(tickerSearch),
+//         subscribe: tickerSearch.subscribe.bind(tickerSearch),
+//     }
+// }
 
 export {
     useCounterPort,
-    useMySharpePort,
-    historicalDataPort,
-    tickerSearchPort,
+    mySharpePort,
+    // historicalDataPort,
+    // tickerSearchPort,
 }

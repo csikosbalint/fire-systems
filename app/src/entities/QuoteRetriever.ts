@@ -4,8 +4,8 @@ import type { IEventBus } from '@shared/IEventBus.js'
 import type { Logger } from '@shared/Logger.js'
 import YahooFinance from 'yahoo-finance2'
 
-export class HistoricalDataRetriever {
-    private namespace = 'HistoricalDataRetriever'
+export class QuoteRetriever {
+    private namespace = 'QuoteRetriever'
     private eventBus: IEventBus
     private logger: Logger
     private yahooFinance: InstanceType<typeof YahooFinance>

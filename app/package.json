@@ -15,6 +15,10 @@
     "./ports": {
       "types": "./dist/ports/index.d.ts",
       "default": "./dist/ports/index.js"
+    },
+    "./ports/server": {
+      "types": "./dist/ports/server/index.d.ts",
+      "default": "./dist/ports/server/index.js"
     }
   },
   "types": "./dist/index.d.ts",

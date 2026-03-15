@@ -22,3 +22,12 @@ export const SearchEventNames = {
   FOUND: 'found',
   NOT_FOUND: 'notfound',
 } as const
+
+export const EnrichmentNames = {
+  MY_SHARPE: 'mySharpe',
+} as const
+
+export const EnrichmentEventNames = {
+  ...EventBase,
+  COMPLETED: 'completed',
+} as const
