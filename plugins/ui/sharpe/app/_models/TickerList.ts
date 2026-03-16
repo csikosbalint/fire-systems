@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Ticker } from '@shared/types/Ticker'
-import { search, download } from '@adapters/server/TickerRead'
+import { search, download } from '@adapters/server/TickerOps'
 import { mysharpe } from '@adapters/browser/QuoteCalculator'
 
 export default function useTickerListModels() {
@@ -13,13 +13,19 @@ export default function useTickerListModels() {
       .then((data) =>
         mysharpe({
           data,
-          lookback: 252,
+          lookback: 125,
+          ticker: ticker.ticker,
         })
       )
+      .then((data) => {
+        console.log('Sharpe enrichment completed for ticker:', ticker.ticker)
+        console.log('Enriched data sample:', data) // Log a sample of the enriched data
+        ticker.sharpe = `${[1, 5, 10, 20].map((days) => data[data.length - days].sharpeRatio?.toFixed(2)).join(' / ')}` // Use the latest sharpe ratio
+        setTickers((prev) => [...prev, ticker])
+      })
       .catch((e) => {
         console.error('Error downloading data for ticker:', e)
       })
-    setTickers((prev) => [...prev, ticker])
   }
 
   const doSearch = async (keyword: string) => {

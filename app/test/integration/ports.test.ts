@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, SearchEventNames, useCounterPort, useMySharpePort, historicalDataPort, tickerSearchPort } from '../../src/ports/index'
+import { CounterEventNames, MySharpeEventNames, HistoricalDataEventNames, SearchEventNames, useCounterPort, mySharpePort } from '../../src/ports/index'
+import {  historicalDataPort, tickerSearchPort} from '../../src/ports/server/index'
 import testdata from '../fixtures/test.json'
 import { HistoricalData } from '../../src/ports/types'
 
@@ -17,24 +18,24 @@ describe('Counter', () => {
 describe('MySharpe', () => {
   it('should expose mySharpe port to an adapter, and create MySharpe instance', () => {
     const data = testdata as unknown as HistoricalData[]
-    const { mySharpe, mySharpeError } = useMySharpePort({ data, ticker: 'TEST', lookback: 125 })
-    expect(mySharpe).toBeDefined()
-    expect(mySharpeError).toBeUndefined()
-    mySharpe?.subscribe(MySharpeEventNames.COMPLETED, (eventData: unknown) => {
+    const { augment, subscribe } = mySharpePort()
+    expect(augment).toBeDefined()
+    expect(subscribe).toBeDefined()
+    subscribe(MySharpeEventNames.COMPLETED, (eventData: unknown) => {
       const data = (eventData as unknown as { data: HistoricalData[] }).data
       expect(data).toBeDefined()
       // today
       const today = data.find((d: HistoricalData) => d.date === '11-14-2013')
       expect(today).toBeDefined()
       const sharpe = today?.sharpeRatio
-      expect(sharpe).toBeCloseTo(3.06, 1)
+      expect(sharpe).toBeCloseTo(3.06, 2)
     })
-    mySharpe?.calculate()
+    augment({ data, lookback: 125 })
   })
 })
 
-describe('HistoricalDataRetrieverFactory', async () => {
-  it('should create HistoricalDataRetriever instance and download historical data', () => {
+describe('DataRetriever', async () => {
+  it('should download historical data', () => {
     const { retrieve, subscribe } = historicalDataPort()
     expect(retrieve).toBeDefined()
     const ret = new Promise<void>((resolve) => {
@@ -57,7 +58,7 @@ describe('HistoricalDataRetrieverFactory', async () => {
     return ret
   })
 
-  it('should handle error when downloading historical data', async () => {
+  it('should handle download error', async () => {
     const { retrieve, subscribe } = historicalDataPort()
     expect(retrieve).toBeDefined()
     const ret = new Promise<void>((resolve) => {
@@ -84,8 +85,7 @@ describe('TickerSearch', () => {
     expect(subscribe).toBeDefined()
 
     const ret = new Promise<void>((resolve) => {
-      subscribe(SearchEventNames.FOUND, (eventData: unknown) => {
-        const result = eventData as { quotes: { symbol: string }[] }
+      subscribe(SearchEventNames.FOUND, ({result}: { result: { quotes: { symbol: string }[] } }) => {
         expect(result).toBeDefined()
         expect(result.quotes).toBeDefined()
         const aapl = result.quotes.find((q) => q.symbol === 'AAPL')

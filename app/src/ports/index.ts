@@ -37,25 +37,7 @@ const mySharpePort = () => {
     }
 }
 
-// const historicalDataPort = () => {
-//     const quoteRetriever = container.resolve('quoteRetriever') as QuoteRetriever
-//     return {
-//         retrieve: quoteRetriever.retrieve.bind(quoteRetriever),
-//         subscribe: quoteRetriever.subscribe.bind(quoteRetriever),
-//     }
-// }
-
-// const tickerSearchPort = () => {
-//     const tickerSearch = container.resolve('tickerSearch') as TickerSearch
-//     return {
-//         search: tickerSearch.search.bind(tickerSearch),
-//         subscribe: tickerSearch.subscribe.bind(tickerSearch),
-//     }
-// }
-
 export {
     useCounterPort,
     mySharpePort,
-    // historicalDataPort,
-    // tickerSearchPort,
 }

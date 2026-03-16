@@ -1,136 +1,89 @@
-# Fire App - Core Application
+# Fire App — Core Business Logic
 
-A TypeScript-based core application using **Hexagonal Architecture (Ports & Adapters)** pattern for building scalable, testable, and maintainable business logic.
+A TypeScript library that fetches historical stock price data and computes **Sharpe Ratios** for financial tickers. It is consumed by the `sharpe` Next.js UI plugin in the same monorepo.
 
-## Architecture Overview
+## Architecture
 
-This application follows the **Hexagonal Architecture** (also known as Ports & Adapters) pattern, which ensures:
-- ✅ **Clean separation** between business logic and infrastructure
-- ✅ **Dependency Injection** for testability
-- ✅ **DRY principle** through shared contracts
-- ✅ **Plugin extensibility** for external adapters (UI, databases, APIs)
-
-### Architecture Diagram
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    External Adapters                        │
-│  (Plugins: UI, Databases, APIs, Message Queues)             │
-│              ↓ consumes                                      │
-│         ┌─────────────────┐                                  │
-│         │  Ports (API)    │  ← Incoming port interfaces     │
-│         └─────────────────┘                                  │
-│              ↓                                                │
-│         ┌─────────────────┐                                  │
-│         │  Interactors    │  ← Business logic                │
-│         └─────────────────┘                                  │
-│              ↓ uses                                           │
-│         ┌─────────────────┐                                  │
-│         │  Shared/Infra   │  ← EventBus, Storage, etc.       │
-│         └─────────────────┘                                  │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Directory Structure
+The project follows **Clean Architecture** (Ports & Adapters / Hexagonal Architecture):
 
 ```
 src/
-├── ports/                    # Incoming port interfaces (contracts)
-│   ├── ICounter.ts          # Counter port interface
-│   ├── ISharpe.ts           # Sharpe port interface
-│   └── index.ts             # Bootstrap & exports
-│
-├── interactors/              # Business logic (use cases)
-│   ├── Counter.ts           # Counter implementation
-│   └── Sharpe.ts            # Sharpe implementation
-│
-├── shared/                   # Infrastructure adapters
-│   ├── IEventBus.ts         # EventBus interface
-│   ├── EventBus.ts          # EventBus implementation
-│   └── ...
-│
-├── entities/                 # Domain entities (data structures)
-│   └── ...
-│
-└── index.ts                  # Public API exports
+├── entities/       — Pure domain computation (no I/O)
+├── interactors/    — Use-case orchestrators
+├── ports/          — Public API surface (IoC container factories)
+│   └── server/     — Server-only ports (network I/O)
+└── shared/         — Infrastructure: DI container, EventBus, Logger
 ```
 
----
+**Dependency rule:** `entities` → `ports/types` only. `interactors` → `entities` + `shared`. `ports` → everything.
 
-## Core Concepts
+**IoC:** [Awilix](https://github.com/jeffijoe/awilix) manages singletons (`eventBus`, `logger`, `validator`, `counter`, `mySharpe`). Server ports additionally register `quoteRetriever` and `tickerSearch`.
 
-### 1. **Ports** (Interfaces)
+**Events:** An in-memory `EventBus` (pub/sub) is injected into every class. Events are namespaced as `ClassName::eventName` (e.g. `MySharpe::completed`, `Counter::update`).
 
-Ports define **how the core exposes its functionality** to external adapters.
+## Key classes
+
+### Entities
+
+| Class | Responsibility |
+|---|---|
+| `Transformer` | Static methods that mutate `HistoricalData[]` in-place: `addProfits`, `addDeviationOfProfits`, `calculateDeviation` (sample std-dev, ÷ n−1), `addSharpeRatio` |
+| `Validator` | `hasEnoughData({ what, data, lookback })` — guards the pipeline (e.g. `data.length >= 2 * lookback` for `'sharpe'`) |
+| `MySharpe` | Orchestrates the full enrichment pipeline: validates → addProfits → addDeviationOfProfits → addSharpeRatio → publishes `MySharpe::completed` |
+| `QuoteRetriever` | Fetches OHLCV data from Yahoo Finance, maps to `HistoricalData[]`, publishes `QuoteRetriever::completed` |
+
+### Interactors
+
+| Class | Responsibility |
+|---|---|
+| `Counter` | Simple increment counter; publishes `Counter::update` (reference/scaffold) |
+| `TickerSearch` | Searches Yahoo Finance by keyword; publishes `TickerSearch::found` |
+
+### Ports (public API)
 
 ```typescript
-// src/ports/ICounter.ts
-export interface ICounter {
-  increment(): void;
-  reset(): void;
-  getCount(): number;
-  subscribe(event: CounterEvent, callback: (data: unknown) => void): void;
-}
+// Client-safe (src/ports/index.ts)
+useCounterPort()  → { counter, increment(), subscribe() }
+mySharpePort()    → { augment(), subscribe() }
+
+// Server-only (src/ports/server/index.ts)
+historicalDataPort() → { retrieve(), subscribe() }
+tickerSearchPort()   → { search(), subscribe() }
 ```
 
-**Key principles:**
-- Port interfaces are the **contract** between core and external world
-- Define incoming operations (commands/queries)
-- Type-safe event subscriptions
-- No implementation details leak out
-
-### 2. **Interactors** (Business Logic)
-
-Interactors implement the ports and contain all business rules.
+### Data types (`src/ports/types.ts`)
 
 ```typescript
-// src/interactors/Counter.ts
-export class Counter implements ICounter {
-  private namespace = 'Counter'
-  private count: number = 0
-  
-  constructor(private eventBus: IEventBus) {}
-  
-  increment(): void {
-    this.count += 1
-    this.eventBus.publish(`${this.namespace}::${CounterEvent.UPDATE}`, this.count)
-  }
-  
-  // ... rest of implementation
-}
+type HistoricalData = {
+  date: string;
+  close: number;
+  profit?: number;
+  deviationOfProfit?: number;
+  sharpeRatio?: number;
+};
 ```
 
-**Key principles:**
-- Receive dependencies via **constructor injection**
-- Contain all domain logic and business rules
-- Publish events for state changes
-- Event namespace stays **internal** (not exposed to consumers)
+## Development
 
-### 3. **Shared Infrastructure**
-
-Shared adapters provide infrastructure capabilities (event bus, storage, etc.)
-
-```typescript
-// src/shared/EventBus.ts
-export class EventBus implements IEventBus {
-  private events: { [key: string]: ((payload: unknown) => void)[] } = {}
-  
-  subscribe(event: string, callback: (data: unknown) => void): void {
-    if (!this.events[event]) this.events[event] = []
-    this.events[event].push(callback)
-  }
-  
-  publish(event: string, data: unknown): void {
-    this.events[event]?.forEach(callback => callback(data))
-  }
-}
+```bash
+npm run dev     # watch mode
+npm run build   # compile to dist/
+npm run test    # unit + integration tests (Vitest)
+npm run lint    # ESLint
 ```
 
-**Key principles:**
-- **Single shared instance** of EventBus across all interactors
-- Implements interface for testability
+## Tests
+
+| File | Covers |
+|---|---|
+| `test/unit/Counter.test.ts` | `Counter` — init, increment, events |
+| `test/unit/entities/Transformer.test.ts` | `addProfits`, `calculateDeviation` (vs known values), `addSharpeRatio` |
+| `test/unit/entities/Validator.test.ts` | `Validator.hasEnoughData` boundary conditions |
+| `test/unit/interactors/MySharpe.test.ts` | `MySharpe.augment` — Sharpe values verified for lookback=250 and lookback=125 against fixture data |
+| `test/integration/ports.test.ts` | `useCounterPort`, `mySharpePort`, `historicalDataPort` (live Yahoo Finance) |
+
+Test helpers in `test/helpers/mocks.ts` provide `createMockLogger()`, `createMockEventBus()`, and `createSpyEventBus()`.
+Fixtures in `test/fixtures/` supply reference historical data for verified Sharpe calculations.
 - Not directly exposed to external consumers
 
 ### 4. **Event-Driven Communication**

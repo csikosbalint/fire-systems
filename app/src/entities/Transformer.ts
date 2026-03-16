@@ -1,5 +1,5 @@
 import type { HistoricalData } from '../ports/types.js'
-// import { calculateStandardDeviation } from '@railpath/finance-toolkit'
+
 export class Transformer {
     static async addProfits(data: HistoricalData[], lookback: number) {
         data.forEach((item, index) => {
@@ -12,13 +12,21 @@ export class Transformer {
     static async addDeviationOfProfits(data: HistoricalData[], lookback: number): Promise<void> {
         data.forEach((item, index) => {
             if (item.profit === undefined) return
-            item.deviationOfProfit = this.calculateDeviation(data.slice(index - lookback, index).map(d => d.profit))
+            item.deviationOfProfit = this.calculateDeviation(data.slice(index - lookback, index).map(d => d.profit).filter(d => d !== undefined) as number[])
         })
     }
-    static calculateDeviation(data: (number | undefined)[]): number | undefined {
-        if (data.some(d => d === undefined)) return undefined
-        // calculate standard deviation of data
-        return undefined // placeholder until calculateStandardDeviation is implemented
+    static calculateDeviation(data: (number[] | undefined)): number | undefined {
+        if (
+            data === undefined ||
+            data.length < 2 ||
+            data.some(d => d === undefined)) {
+            return undefined
+        } else {
+            // calculate sample standard deviation of data
+            const mean = data.reduce((sum, d) => sum + (d as number), 0) / data.length
+            const variance = data.reduce((sum, d) => sum + Math.pow((d as number) - mean, 2), 0) / (data.length - 1)
+            return Math.sqrt(variance)
+        }
     }
     static async addSharpeRatio(data: HistoricalData[]): Promise<void> {
         data.forEach((item) => {

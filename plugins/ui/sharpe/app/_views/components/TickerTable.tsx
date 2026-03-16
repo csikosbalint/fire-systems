@@ -40,7 +40,7 @@ export default function TickerTable({ tickers } : { tickers: Ticker[] }) {
                 {ticker.market}
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
-                { ticker?.sharpe ? ticker.sharpe.toFixed(2) :  <Skeleton className="h-4 w-full" /> }
+                { ticker?.sharpe ||  <Skeleton className="h-4 w-full" /> }
               </TableCell>
             </TableRow>
           ))}

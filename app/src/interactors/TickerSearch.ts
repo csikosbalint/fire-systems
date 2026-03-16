@@ -26,7 +26,7 @@ export class TickerSearch {
       this.yahooFinance
           .search(keyword).then((result: SearchResult) => {
         // Publish the search result event
-        this.eventBus.publish(`${this.namespace}::${SearchEventNames.FOUND}`, result)
+        this.eventBus.publish(`${this.namespace}::${SearchEventNames.FOUND}`, {result})
     })
   }
   

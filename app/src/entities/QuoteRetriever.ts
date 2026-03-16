@@ -25,11 +25,15 @@ export class QuoteRetriever {
             interval: '1d',
         })
         return result.then((data) => {
-            const historicalData: HistoricalData[] = data.quotes.map((quote) => ({
+            this.logger.info(`${this.namespace} - Successfully retrieved historical data for ticker ${ticker} from Yahoo Finance`)
+            this.logger.debug(`${this.namespace} - Raw data: ${JSON.stringify(data)}`)
+            const historicalData: HistoricalData[] = data.quotes
+                .filter((item) => item.close !== null && item.date !== null)
+                .map((quote) => ({
             date: quote.date.toISOString().split('T')[0],
             close: quote.close,
         } as HistoricalData))
-            this.eventBus.publish(`${this.namespace}::${HistoricalDataEventNames.COMPLETED}`, { data: historicalData })
+            this.eventBus.publish(`${this.namespace}::${HistoricalDataEventNames.COMPLETED}`, {data: historicalData})
             return historicalData as HistoricalData[]
         })
         .catch((error) => {

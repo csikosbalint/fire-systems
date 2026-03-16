@@ -7,5 +7,7 @@
       "path": "plugins/ui/sharpe",
     },
   ],
-  "settings": {},
+  "settings": {
+    "debug.javascript.unmapMissingSources": true,
+  },
 }
