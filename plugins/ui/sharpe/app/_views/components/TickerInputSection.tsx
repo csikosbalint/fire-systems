@@ -72,9 +72,9 @@ export default function TickerInputSection({
           <CommandList>
             <CommandEmpty>No results found.</CommandEmpty>
             <CommandGroup>
-              {results.map((ticker) => (
+              {results.map((ticker, i) => (
                 <CommandItem
-                  key={ticker.ticker}
+                  key={`${ticker.ticker}-${i}`}
                   value={ticker.ticker}
                   onSelect={() => handleSelect(ticker)}
                   className="flex flex-col items-start gap-0.5 cursor-pointer"

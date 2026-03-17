@@ -1,4 +1,6 @@
+import { Trash2 } from 'lucide-react'
 import { Ticker } from '@shared/types/Ticker'
+import { Button } from '@ui/button'
 import { Skeleton } from '@ui/skeleton'
 import {
   Table,
@@ -9,7 +11,13 @@ import {
   TableRow,
 } from '@ui/table'
 
-export default function TickerTable({ tickers } : { tickers: Ticker[] }) {
+export default function TickerTable({
+  tickers,
+  onRemove,
+}: {
+  tickers: Ticker[]
+  onRemove: (tickerSymbol: string) => void
+}) {
   if (tickers.length === 0) {
     return (
       <div className="rounded-lg border border-border bg-card p-8 text-center">
@@ -29,10 +37,11 @@ export default function TickerTable({ tickers } : { tickers: Ticker[] }) {
             <TableHead>Name</TableHead>
             <TableHead className="text-right">Market</TableHead>
             <TableHead className="text-right">Sharpe</TableHead>
+            <TableHead className="w-10" />
           </TableRow>
         </TableHeader>
         <TableBody>
-          {tickers.map((ticker,index) => (
+          {tickers.map((ticker, index) => (
             <TableRow key={index}>
               <TableCell className="font-mono text-sm">{ticker.ticker}</TableCell>
               <TableCell>{ticker.name}</TableCell>
@@ -40,7 +49,17 @@ export default function TickerTable({ tickers } : { tickers: Ticker[] }) {
                 {ticker.market}
               </TableCell>
               <TableCell className="text-right text-muted-foreground">
-                { ticker?.sharpe ||  <Skeleton className="h-4 w-full" /> }
+                {ticker?.sharpe || <Skeleton className="h-4 w-full" />}
+              </TableCell>
+              <TableCell>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onRemove(ticker.ticker)}
+                  aria-label={`Remove ${ticker.ticker}`}
+                >
+                  <Trash2 className="h-4 w-4 text-muted-foreground" />
+                </Button>
               </TableCell>
             </TableRow>
           ))}

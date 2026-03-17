@@ -1,52 +1,65 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Ticker } from '@shared/types/Ticker'
 import { search, download } from '@adapters/server/TickerOps'
 import { mysharpe } from '@adapters/browser/QuoteCalculator'
+import useTickerStore from './TickerStore'
 
-export default function useTickerListModels() {
-  // models for the view
-  const [tickers, setTickers] = useState<Ticker[]>([])
+export default function useTickerListAdapter() {
+  const { addTicker, removeTicker, updateSharpe } = useTickerStore()
   const [results, setResults] = useState<Ticker[]>([])
 
-  const addTicker = async ({ ticker }: { ticker: Ticker }): Promise<void> => {
+  const fetchSharpe = (ticker: Ticker) =>
     download({ ticker })
-      .then((data) =>
-        mysharpe({
-          data,
-          lookback: 125,
-          ticker: ticker.ticker,
-        })
-      )
+      .then((data) => mysharpe({ data, lookback: 125, ticker: ticker.ticker }))
       .then((data) => {
-        console.log('Sharpe enrichment completed for ticker:', ticker.ticker)
-        console.log('Enriched data sample:', data) // Log a sample of the enriched data
-        ticker.sharpe = `${[1, 5, 10, 20].map((days) => data[data.length - days].sharpeRatio?.toFixed(2)).join(' / ')}` // Use the latest sharpe ratio
-        setTickers((prev) => [...prev, ticker])
+        const sharpe = `${[1, 5, 10, 20]
+          .map((days) => data[data.length - days].sharpeRatio?.toFixed(2))
+          .join(' / ')}`
+        updateSharpe(ticker.ticker, sharpe)
       })
       .catch((e) => {
-        console.error('Error downloading data for ticker:', e)
+        console.error('Error computing sharpe for ticker:', ticker.ticker, e)
       })
-  }
 
-  const doSearch = async (keyword: string) => {
-    setResults([]) // Clear previous search results
-    if (keyword.trim() === '') {
-      return
+  const useController = () => {
+    const tickers = useTickerStore((s) => s.tickers)
+    const hasFetchedOnLoad = useRef(false)
+
+    // Watch tickers so this fires after Zustand persist hydrates from localStorage.
+    // The ref prevents re-running when updateSharpe later mutates tickers.
+    useEffect(() => {
+      if (hasFetchedOnLoad.current || tickers.length === 0) return
+      hasFetchedOnLoad.current = true
+      tickers.filter((t) => !t.sharpe).forEach((t) => fetchSharpe(t))
+    }, [tickers])
+
+    const doAddTicker = async ({
+      ticker,
+    }: {
+      ticker: Ticker
+    }): Promise<void> => {
+      addTicker(ticker)
+      fetchSharpe(ticker)
     }
-    return search(keyword)
-      .then((result) => {
-        setResults(result)
-      })
-      .catch((e) => {
-        console.error('Error searching for ticker:', e)
-        setResults([])
-      })
+
+    const doSearch = async (keyword: string) => {
+      setResults([])
+      if (keyword.trim() === '') return
+      return search(keyword)
+        .then(setResults)
+        .catch((e) => {
+          console.error('Error searching for ticker:', e)
+          setResults([])
+        })
+    }
+
+    return { addTicker: doAddTicker, removeTicker, doSearch }
   }
 
-  return {
-    tickers,
-    addTicker,
+  const usePresenter = () => ({
+    tickers: useTickerStore((s) => s.tickers),
     results,
-    doSearch,
-  }
+  })
+
+  return { useController, usePresenter }
 }
