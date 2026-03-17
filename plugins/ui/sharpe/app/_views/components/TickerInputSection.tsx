@@ -1,21 +1,32 @@
 'use client'
 
-import { Plus } from 'lucide-react'
-import { Button } from '@ui/button'
 import { Input } from '@ui/input'
+import { Popover, PopoverContent, PopoverAnchor } from '@ui/popover'
+import {
+  Command,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+} from '@ui/command'
 import type { Ticker } from '@shared/types/Ticker'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function TickerInputSection({
   add,
   search,
-  found,
+  results,
 }: {
-    add: (ticker: Ticker) => void
-    search: (keyword: string) => void
-    found: Ticker | null
+  add: (ticker: Ticker) => void
+  search: (keyword: string) => void
+  results: Ticker[]
 }) {
   const [keyword, setKeyword] = useState('')
+  const [open, setOpen] = useState(false)
+
+  useEffect(() => {
+    setOpen(results.length > 0)
+  }, [results])
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.toUpperCase()
@@ -23,60 +34,62 @@ export default function TickerInputSection({
     search(value)
   }
 
-  const handleAddClick = () => {
-    if (found) {
-      add(found)
-      setKeyword('')
-      search('') // Clear search result after adding
-    }
+  const handleSelect = (ticker: Ticker) => {
+    add(ticker)
+    setKeyword('')
+    setOpen(false)
+    search('')
   }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleAddClick()
+    if (e.key === 'Enter' && results.length > 0) {
+      handleSelect(results[0])
+    }
+    if (e.key === 'Escape') {
+      setOpen(false)
     }
   }
 
   return (
-    <div className="grid grid-cols-6 gap-3 items-center">
-      <Input
-        type="text"
-        placeholder="Enter ISIN..."
-        value={ keyword }
-        onChange={handleSearchChange}
-        onKeyDown={handleKeyDown}
-        className="col-span-2"
-        maxLength={12}
-      />
-
-      {/* Found Ticker Name Label - 3/6 width */}
-      <div className="col-span-3">
-        {found ? (
-          <p
-            className={`text-sm ${
-              found === null
-                ? 'text-destructive'
-                : 'text-foreground font-medium'
-            }`}
-          >
-            {found ? found.name : 'Ticker not found'}
-          </p>
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            {keyword ? 'Enter valid ISIN (12 characters)' : 'No ticker selected'}
-          </p>
-        )}
-      </div>
-
-      {/* Add Button - 1/6 width */}
-      <Button
-        onClick={handleAddClick}
-        disabled={!keyword || !found}
-        className="col-span-1"
-        size="icon"
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverAnchor asChild>
+        <Input
+          type="text"
+          placeholder="Search by name or symbol..."
+          value={keyword}
+          onChange={handleSearchChange}
+          onKeyDown={handleKeyDown}
+          maxLength={50}
+          autoComplete="off"
+        />
+      </PopoverAnchor>
+      <PopoverContent
+        className="p-0 w-[--radix-popover-trigger-width]"
+        align="start"
+        onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <Plus className="h-4 w-4" />
-      </Button>
-    </div>
+        <Command shouldFilter={false}>
+          <CommandList>
+            <CommandEmpty>No results found.</CommandEmpty>
+            <CommandGroup>
+              {results.map((ticker) => (
+                <CommandItem
+                  key={ticker.ticker}
+                  value={ticker.ticker}
+                  onSelect={() => handleSelect(ticker)}
+                  className="flex flex-col items-start gap-0.5 cursor-pointer"
+                >
+                  <span className="font-semibold text-sm">{ticker.ticker}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {ticker.name}
+                    {ticker.market ? ` · ${ticker.market}` : ''}
+                  </span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   )
 }

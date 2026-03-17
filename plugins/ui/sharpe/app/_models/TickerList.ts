@@ -6,7 +6,7 @@ import { mysharpe } from '@adapters/browser/QuoteCalculator'
 export default function useTickerListModels() {
   // models for the view
   const [tickers, setTickers] = useState<Ticker[]>([])
-  const [found, setFound] = useState<Ticker | null>(null)
+  const [results, setResults] = useState<Ticker[]>([])
 
   const addTicker = async ({ ticker }: { ticker: Ticker }): Promise<void> => {
     download({ ticker })
@@ -29,25 +29,24 @@ export default function useTickerListModels() {
   }
 
   const doSearch = async (keyword: string) => {
-    setFound(null) // Clear previous search result
+    setResults([]) // Clear previous search results
     if (keyword.trim() === '') {
-      setFound(null)
       return
     }
     return search(keyword)
       .then((result) => {
-        setFound(result)
+        setResults(result)
       })
       .catch((e) => {
         console.error('Error searching for ticker:', e)
-        setFound(null)
+        setResults([])
       })
   }
 
   return {
     tickers,
     addTicker,
-    found,
+    results,
     doSearch,
   }
 }

@@ -4,7 +4,7 @@ import TickerTable from './components/TickerTable'
 import TickerInputSection from './components/TickerInputSection'
 
 export default function TickerList() {
-  const { tickers, found, addTicker, doSearch } = useTickerListModels()
+  const { tickers, results, addTicker, doSearch } = useTickerListModels()
   return (
     <div className="space-y-6">
       {/* Title Section */}
@@ -16,7 +16,7 @@ export default function TickerList() {
       </div>
 
       {/* Input Section */}
-      <TickerInputSection add={(ticker) => addTicker({ ticker })} search={doSearch} found={found} />
+      <TickerInputSection add={(ticker) => addTicker({ ticker })} search={doSearch} results={results} />
 
       {/* Table Section */}
       <TickerTable tickers={tickers} />

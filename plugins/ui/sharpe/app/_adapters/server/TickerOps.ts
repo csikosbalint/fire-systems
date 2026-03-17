@@ -8,9 +8,9 @@ import {
 
 import { tickerSearchPort, historicalDataPort } from 'fire-app/ports/server'
 
-export async function search(keyword: string): Promise<Ticker | null> {
+export async function search(keyword: string): Promise<Ticker[]> {
   const { search, subscribe } = tickerSearchPort()
-  const ret = new Promise<Ticker | null>((resolve) => {
+  const ret = new Promise<Ticker[]>((resolve) => {
     // Subscribe to search results
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     subscribe(SearchEventNames.FOUND, (event) => {
@@ -24,21 +24,20 @@ export async function search(keyword: string): Promise<Ticker | null> {
           }[]
         }
       }
-      if (result.quotes && result.quotes.length === 1) {
-        resolve({
-          market: result.quotes[0].exchDisp,
-          ticker: result.quotes[0].symbol,
-          name:
-            result.quotes[0].longname ||
-            result.quotes[0].shortname ||
-            result.quotes[0].symbol,
-        })
+      if (result.quotes && result.quotes.length > 0) {
+        resolve(
+          result.quotes.map((q) => ({
+            market: q.exchDisp,
+            ticker: q.symbol,
+            name: q.longname || q.shortname || q.symbol,
+          }))
+        )
       } else {
-        resolve(null)
+        resolve([])
       }
     })
     subscribe(SearchEventNames.NOT_FOUND, () => {
-      resolve(null)
+      resolve([])
     })
   })
   search(keyword)
