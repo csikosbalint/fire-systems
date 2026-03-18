@@ -18,7 +18,7 @@ export class QuoteRetriever {
         this.yahooFinance = new YahooFinance()
     }
 
-    async retrieve({startDate, endDate, ticker }: { startDate: Date, endDate: Date, ticker: string }): Promise<HistoricalData[] | void> {
+    async retrieve({startDate, endDate, ticker }: { startDate: Date, endDate: Date, ticker: string }): Promise<HistoricalData[]> {
         const result =  this.yahooFinance.chart(ticker, {
             period1: startDate,
             period2: endDate,
@@ -26,19 +26,15 @@ export class QuoteRetriever {
         })
         return result.then((data) => {
             this.logger.info(`${this.namespace} - Successfully retrieved historical data for ticker ${ticker} from Yahoo Finance`)
-            this.logger.debug(`${this.namespace} - Raw data: ${JSON.stringify(data)}`)
-            const historicalData: HistoricalData[] = data.quotes
+            const historicalData = data.quotes
                 .filter((item) => item.close !== null && item.date !== null)
-                .map((quote) => ({
-            date: quote.date.toISOString().split('T')[0],
-            close: quote.close,
-        } as HistoricalData))
             this.eventBus.publish(`${this.namespace}::${HistoricalDataEventNames.COMPLETED}`, {data: historicalData})
-            return historicalData as HistoricalData[]
+            return historicalData as unknown as HistoricalData[]
         })
         .catch((error) => {
             this.eventBus.publish(`${this.namespace}::${HistoricalDataEventNames.ERROR}`, { error: error.message })
             this.logger.error(`${this.namespace} - Error retrieving historical data for ticker ${ticker}: ${error.message}`)
+            throw error
         })
     }
 

@@ -10,6 +10,7 @@ export default function useTickerListAdapter() {
 
   const fetchSharpe = (ticker: Ticker) =>
     download({ ticker })
+      .then((data) => data.slice(0, -1)) // Exclude most recent day which may be incomplete
       .then((data) => mysharpe({ data, lookback: 125, ticker: ticker.ticker }))
       .then((data) => {
         const sharpe = `${[1, 5, 10, 20]

@@ -16,7 +16,8 @@
       "serverReadyAction": {
         "action": "startDebugging",
         "name": "Chrome: Client (fire-app maps)",
-        "pattern": "- Local:\\s+(https?://.+)"
+        "pattern": "- Local:\\s+(https?://.+)",
+        "killOnServerStop": true
       },
       "skipFiles": ["<node_internals>/**"]
     },

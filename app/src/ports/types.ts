@@ -8,8 +8,13 @@ export type Enrichments = typeof EnrichmentNames[keyof typeof EnrichmentNames]
 export type EnrichmentEvents = typeof EnrichmentEventNames[keyof typeof EnrichmentEventNames]
 
 export type HistoricalData = {
-  date: string;
+  date: string | Date;
   close: number;
+  adjclose?: number;
+  high?: number;
+  low?: number;
+  open?: number;
+  volume?: number;
   profit?: number | undefined;
   deviationOfProfit?: number | undefined;
   sharpeRatio?: number | undefined;

@@ -24,10 +24,14 @@ export class TickerSearch {
     // For demonstration, we'll just log the keyword and publish a dummy result
     this.logger.info(`Searching for keyword: ${keyword}`)
       this.yahooFinance
-          .search(keyword).then((result: SearchResult) => {
-        // Publish the search result event
-        this.eventBus.publish(`${this.namespace}::${SearchEventNames.FOUND}`, {result})
-    })
+        .search(keyword)
+        .then((result: SearchResult) => {
+          // Publish the search result event
+          this.eventBus.publish(`${this.namespace}::${SearchEventNames.FOUND}`, {result})
+        })
+        .catch((error: unknown) => {
+          this.eventBus.publish(`${this.namespace}::${SearchEventNames.ERROR}`, {error})
+        })
   }
   
   subscribe(event: SearchEvent, callback: (data: unknown) => void): void {
