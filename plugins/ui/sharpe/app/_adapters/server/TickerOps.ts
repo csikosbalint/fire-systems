@@ -16,15 +16,18 @@ export async function search(keyword: string): Promise<Ticker[]> {
             exchDisp: string
             longname?: string
             shortname?: string
+            quoteType: string
           }[]
         }
       }
       if (result.quotes && result.quotes.length > 0) {
+        console.log('Search found results:', result)
         resolve(
           result.quotes.map((q) => ({
             market: q.exchDisp,
             ticker: q.symbol,
             name: q.longname || q.shortname || q.symbol,
+            type: q.quoteType,
           }))
         )
       } else {

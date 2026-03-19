@@ -44,7 +44,7 @@ export default function TickerTable({
           {tickers.map((ticker, index) => (
             <TableRow key={index}>
               <TableCell className="font-mono text-sm">{ticker.ticker}</TableCell>
-              <TableCell>{ticker.name}</TableCell>
+              <TableCell>{ticker.name} {ticker.type ? `(${ticker.type})` : ''}</TableCell>
               <TableCell className="text-right text-muted-foreground">
                 {ticker.market}
               </TableCell>

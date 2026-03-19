@@ -3,6 +3,7 @@ type Ticker = {
   name: string
   ticker: string
   sharpe?: string
+  type?: string
 }
 
 export type { Ticker }
