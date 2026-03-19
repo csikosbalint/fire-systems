@@ -1,18 +1,22 @@
 import type { HistoricalData } from '../ports/types.js'
 
 export class Transformer {
-    static async addProfits(data: HistoricalData[], lookback: number) {
-        data.forEach((item, index) => {
-        if (index < lookback) return
-            const previous = data[index - lookback]
-            if (!previous) return
+    static async addProfits(data: HistoricalData[], lookback: number): Promise<HistoricalData[]> {
+        const copyOfData = JSON.parse(JSON.stringify(data)) as HistoricalData[]
+        return copyOfData.map((item, index): HistoricalData=> {
+            if (index < lookback) return item
+            const previous = copyOfData[index - lookback]
+            if (!previous) return item
             item.profit = (item.close - previous.close) / previous.close
+            return item
         })
     }
-    static async addDeviationOfProfits(data: HistoricalData[], lookback: number): Promise<void> {
-        data.forEach((item, index) => {
-            if (item.profit === undefined) return
-            item.deviationOfProfit = this.calculateDeviation(data.slice(index - lookback, index).map(d => d.profit).filter(d => d !== undefined) as number[])
+    static async addDeviationOfProfits(data: HistoricalData[], lookback: number): Promise<HistoricalData[]> {
+        const copyOfData = JSON.parse(JSON.stringify(data)) as HistoricalData[]
+        return copyOfData.map((item, index) => {
+            if (item.profit === undefined) return item
+            item.deviationOfProfit = this.calculateDeviation(copyOfData.slice(index - lookback, index).map(d => d.profit).filter(d => d !== undefined) as number[])
+            return item
         })
     }
     static calculateDeviation(data: (number[] | undefined)): number | undefined {
@@ -28,10 +32,12 @@ export class Transformer {
             return Math.sqrt(variance)
         }
     }
-    static async addSharpeRatio(data: HistoricalData[]): Promise<void> {
-        data.forEach((item) => {
-            if (item.profit === undefined || item.deviationOfProfit === undefined) return
+    static async addSharpeRatio(data: HistoricalData[]): Promise<HistoricalData[]> {
+        const copyOfData = JSON.parse(JSON.stringify(data)) as HistoricalData[]
+        return copyOfData.map((item) => {
+            if (item.profit === undefined || item.deviationOfProfit === undefined) return item
             item.sharpeRatio = item.profit / item.deviationOfProfit
+            return item
         })
     }
 }

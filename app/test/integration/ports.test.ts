@@ -54,9 +54,9 @@ describe('DataRetriever', async () => {
         const data = (eventData as unknown as { data: HistoricalData[] }).data
         expect(data).toBeDefined()
         // today
-        const last = data.find((d: HistoricalData) => d.date.toISOString().startsWith('2026-03-05'))
+        const last = data.find((d: HistoricalData) => (d.date as Date).toISOString().startsWith('2026-03-05'))
         expect(last?.close).toBeCloseTo(260.29, 2)
-        const first = data.find((d: HistoricalData) => d.date.toISOString().startsWith('2026-01-02'))
+        const first = data.find((d: HistoricalData) => (d.date as Date).toISOString().startsWith('2026-01-02'))
         expect(first?.close).toBeCloseTo(271.01, 2)
         resolve()
       })

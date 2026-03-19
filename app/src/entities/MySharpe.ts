@@ -25,11 +25,11 @@ export class MySharpe {
     }
     // add profit, deviation of profit, and sharpe ratio to data
     return Transformer.addProfits(data, lookback)
-      .then(() => Transformer.addDeviationOfProfits(data, lookback))
-      .then(() => Transformer.addSharpeRatio(data))
-      .then(() => {
-        this.eventBus.publish(`${this.namespace}::${MySharpeEventNames.COMPLETED}`, { ticker, data })
-        return data
+      .then((dataWithProfits) => Transformer.addDeviationOfProfits(dataWithProfits, lookback))
+      .then((dataWithDeviation) => Transformer.addSharpeRatio(dataWithDeviation))
+      .then((dataWithSharpe) => {
+        this.eventBus.publish(`${this.namespace}::${MySharpeEventNames.COMPLETED}`, { ticker, data: dataWithSharpe })
+        return dataWithSharpe
       })
   }
 

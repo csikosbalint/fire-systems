@@ -17,31 +17,31 @@ describe('Transformer Entity', () => {
   })
 
   describe('addProfits', () => {
-    it('should add profit calculation to data points after lookback period', () => {
+    it('should add profit calculation to data points after lookback period', async () => {
       const lookback = 2
-      Transformer.addProfits(testData, lookback)
+      const result = await Transformer.addProfits(testData, lookback)
 
-      expect(testData[0].profit).toBeUndefined()
-      expect(testData[1].profit).toBeUndefined()
-      expect(testData[2].profit).toBeCloseTo(0.05) // (105 - 100) / 100
-      expect(testData[3].profit).toBeCloseTo(0.0098, 4) // (103 - 102) / 102
-      expect(testData[4].profit).toBeCloseTo(0.0286, 4) // (108 - 105) / 105
+      expect(result[0].profit).toBeUndefined()
+      expect(result[1].profit).toBeUndefined()
+      expect(result[2].profit).toBeCloseTo(0.05) // (105 - 100) / 100
+      expect(result[3].profit).toBeCloseTo(0.0098, 4) // (103 - 102) / 102
+      expect(result[4].profit).toBeCloseTo(0.0286, 4) // (108 - 105) / 105
     })
 
-    it('should handle lookback of 1', () => {
+    it('should handle lookback of 1', async () => {
       const lookback = 1
-      Transformer.addProfits(testData, lookback)
+      const result = await Transformer.addProfits(testData, lookback)
 
-      expect(testData[0].profit).toBeUndefined()
-      expect(testData[1].profit).toBeCloseTo(0.02) // (102 - 100) / 100
-      expect(testData[2].profit).toBeCloseTo(0.0294, 4) // (105 - 102) / 102
+      expect(result[0].profit).toBeUndefined()
+      expect(result[1].profit).toBeCloseTo(0.02) // (102 - 100) / 100
+      expect(result[2].profit).toBeCloseTo(0.0294, 4) // (105 - 102) / 102
     })
 
-    it('should not modify data when lookback exceeds data length', () => {
+    it('should not modify data when lookback exceeds data length', async () => {
       const lookback = 10
-      Transformer.addProfits(testData, lookback)
+      const result = await Transformer.addProfits(testData, lookback)
 
-      testData.forEach((item) => {
+      result.forEach((item) => {
         expect(item.profit).toBeUndefined()
       })
     })
@@ -99,53 +99,53 @@ describe('Transformer Entity', () => {
   })
 
   describe('addDeviationOfProfits', () => {
-    it('should add deviation of profits when profits exist', () => {
+    it('should add deviation of profits when profits exist', async () => {
       const lookback = 2
-      Transformer.addProfits(testData, lookback)
-      Transformer.addDeviationOfProfits(testData, lookback)
+      const result = await Transformer.addProfits(testData, lookback)
+        .then((dataWithProfits) => Transformer.addDeviationOfProfits(dataWithProfits, lookback))
 
-      expect(testData[2].deviationOfProfit).toBeUndefined() // Not enough lookback
-      expect(testData[3].deviationOfProfit).toBeUndefined() // Not enough lookback
-      expect(testData[4].deviationOfProfit).toBeDefined()
+      expect(result[2].deviationOfProfit).toBeUndefined() // Not enough lookback
+      expect(result[3].deviationOfProfit).toBeUndefined() // Not enough lookback
+      expect(result[4].deviationOfProfit).toBeDefined()
     })
 
-    it('should skip data points without profit', () => {
+    it('should skip data points without profit', async () => {
       const lookback = 1
-      Transformer.addDeviationOfProfits(testData, lookback)
+      const result = await Transformer.addDeviationOfProfits(testData, lookback)
 
-      testData.forEach((item) => {
+      result.forEach((item) => {
         expect(item.deviationOfProfit).toBeUndefined()
       })
     })
   })
 
   describe('addSharpeRatio', () => {
-    it('should calculate Sharpe ratio when profit and deviation exist', () => {
+    it('should calculate Sharpe ratio when profit and deviation exist', async () => {
       testData[2].profit = 0.05
       testData[2].deviationOfProfit = 0.01
 
-      Transformer.addSharpeRatio(testData)
+      const result = await Transformer.addSharpeRatio(testData)
 
-      expect(testData[2].sharpeRatio).toBeCloseTo(5.0)
+      expect(result[2].sharpeRatio).toBeCloseTo(5.0)
     })
 
-    it('should not calculate Sharpe ratio when profit is missing', () => {
+    it('should not calculate Sharpe ratio when profit is missing', async () => {
       testData[2].deviationOfProfit = 0.01
 
-      Transformer.addSharpeRatio(testData)
+      const result = await Transformer.addSharpeRatio(testData)
 
-      expect(testData[2].sharpeRatio).toBeUndefined()
+      expect(result[2].sharpeRatio).toBeUndefined()
     })
 
-    it('should not calculate Sharpe ratio when deviation is missing', () => {
+    it('should not calculate Sharpe ratio when deviation is missing', async () => {
       testData[2].profit = 0.05
 
-      Transformer.addSharpeRatio(testData)
+      const result = await Transformer.addSharpeRatio(testData)
 
-      expect(testData[2].sharpeRatio).toBeUndefined()
+      expect(result[2].sharpeRatio).toBeUndefined()
     })
 
-    it('should handle division by deviation across multiple data points', () => {
+    it('should handle division by deviation across multiple data points', async () => {
       testData.forEach((item, i) => {
         if (i > 1) {
           item.profit = 0.02 * i
@@ -153,13 +153,13 @@ describe('Transformer Entity', () => {
         }
       })
 
-      Transformer.addSharpeRatio(testData)
+      const result = await Transformer.addSharpeRatio(testData)
 
-      expect(testData[0].sharpeRatio).toBeUndefined()
-      expect(testData[1].sharpeRatio).toBeUndefined()
-      expect(testData[2].sharpeRatio).toBeCloseTo(4.0)
-      expect(testData[3].sharpeRatio).toBeCloseTo(6.0)
-      expect(testData[4].sharpeRatio).toBeCloseTo(8.0)
+      expect(result[0].sharpeRatio).toBeUndefined()
+      expect(result[1].sharpeRatio).toBeUndefined()
+      expect(result[2].sharpeRatio).toBeCloseTo(4.0)
+      expect(result[3].sharpeRatio).toBeCloseTo(6.0)
+      expect(result[4].sharpeRatio).toBeCloseTo(8.0)
     })
   })
 })

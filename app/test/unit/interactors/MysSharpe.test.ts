@@ -8,7 +8,7 @@ import { MySharpeEventNames } from '../../../src/ports/index.js'
 describe('MysSharpe', () => {
     let mockEventBus: ReturnType<typeof createMockEventBus>
     let mockLogger: ReturnType<typeof createMockLogger>
-    let mySharpe: any
+    let mySharpe: MySharpe
     beforeEach(() => {
         mockEventBus = createMockEventBus()
         mockLogger = createMockLogger()
@@ -24,7 +24,7 @@ describe('MysSharpe', () => {
         const ticker = 'test'
         const result = await mySharpe.augment({ data, lookback, ticker })
         // Assert
-        expect(mockEventBus.publish).toBeCalled()//.toHaveBeenCalledWith('MySharpe::TEST::completed', expect.objectContaining({ ticker: 'TEST', data: expect.any(Array) }))
+        expect(mockEventBus.publish).toHaveBeenCalledWith(`MySharpe::${MySharpeEventNames.COMPLETED}`, expect.objectContaining({ ticker, data: expect.any(Array) }))
         // today
         expect(result.find((d: HistoricalData) => d.date === '11-14-2013').sharpeRatio).toBeCloseTo(5.46, 1)
         // week ago
@@ -51,7 +51,7 @@ describe('MysSharpe', () => {
         // Act
         const result = await mySharpe.augment({ data, lookback, ticker })
         // Assert
-        expect(mockEventBus.publish).toHaveBeenCalledWith(`MySharpe::${MySharpeEventNames.COMPLETED}`, expect.objectContaining({ ticker: 'test', data: expect.any(Array) }))
+        expect(mockEventBus.publish).toHaveBeenCalledWith(`MySharpe::${MySharpeEventNames.COMPLETED}`, expect.objectContaining({ ticker, data: expect.any(Array) }))
         // today
         expect(result.find((d: HistoricalData) => d.date === '11-14-2013').sharpeRatio).toBeCloseTo(3.06, 1)
         // week ago
