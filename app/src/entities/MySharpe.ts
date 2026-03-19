@@ -21,6 +21,7 @@ export class MySharpe {
   async augment({ data, lookback, ticker ='unknown' }: { data: HistoricalData[], lookback: number, ticker?: string }): Promise<HistoricalData[]> {
     // check if data has enough points for lookback
     if (!Validator.hasEnoughData({what: 'sharpe', data, lookback})) {
+      this.eventBus.publish(`${this.namespace}::${MySharpeEventNames.ERROR}`, { ticker, message: 'Not enough data for lookback' })
       throw new Error('Not enough data for lookback')
     }
     // add profit, deviation of profit, and sharpe ratio to data

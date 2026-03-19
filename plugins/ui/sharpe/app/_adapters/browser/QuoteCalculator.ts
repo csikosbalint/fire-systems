@@ -27,15 +27,19 @@ export async function calculateMySharpe({
       resolve(data)
     })
     subscribe(EnrichmentEventNames.ERROR, (event) => {
-      const error = (event as unknown as { error: unknown }).error
-      console.error('Error during enrichment:', error)
-      reject(error)
+      const { ticker, message } = event as unknown as {
+        ticker: string
+        message: string
+      }
+      reject({ message, ticker })
     })
   })
   augment({
     data,
     lookback,
     ticker,
+  }).catch((error) => {
+    console.warn('Some error happened. Please see logs for details:', error)
   })
   return ret
 }

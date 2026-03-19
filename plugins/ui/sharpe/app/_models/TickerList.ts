@@ -27,7 +27,12 @@ export default function useTickerListAdapter() {
         updateSharpe(ticker.ticker, sharpe)
       })
       .catch((e) => {
-        console.error('Error computing sharpe for ticker:', ticker.ticker, e)
+        console.error(
+          'Error computing sharpe for ticker:',
+          e.ticker,
+          e.message || e
+        )
+        updateSharpe(ticker.ticker, e.message || 'Error')
       })
 
   const useController = () => {

@@ -46,7 +46,7 @@ export async function download({
 }): Promise<HistoricalData[]> {
   const { retrieve } = historicalDataPort()
   const startDate = new Date()
-  startDate.setFullYear(startDate.getFullYear() - 1) // 1 year ago
+  startDate.setFullYear(startDate.getFullYear() - 2) // 2 years ago
   const endDate = new Date()
 
   return retrieve({ ticker: ticker.ticker, startDate, endDate })
