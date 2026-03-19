@@ -6,7 +6,7 @@ import {
   mySharpePort,
 } from 'fire-app/ports'
 
-export async function mysharpe({
+export async function calculateMySharpe({
   data,
   lookback,
   ticker,

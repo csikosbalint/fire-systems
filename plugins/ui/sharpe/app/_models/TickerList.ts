@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Ticker } from '@shared/types/Ticker'
 import { search, download } from '@adapters/server/TickerOps'
-import { mysharpe } from '@adapters/browser/QuoteCalculator'
+import { calculateMySharpe } from '@adapters/browser/QuoteCalculator'
 import useTickerStore from './TickerStore'
 
 export default function useTickerListAdapter() {
@@ -11,10 +11,18 @@ export default function useTickerListAdapter() {
   const fetchSharpe = (ticker: Ticker) =>
     download({ ticker })
       .then((data) => data.slice(0, -1)) // Exclude most recent day which may be incomplete
-      .then((data) => mysharpe({ data, lookback: 125, ticker: ticker.ticker }))
-      .then((data) => {
+      .then((dataWithoutToday) =>
+        calculateMySharpe({
+          data: dataWithoutToday,
+          lookback: 125,
+          ticker: ticker.ticker,
+        })
+      )
+      .then((dataWithSharpe) => {
         const sharpe = `${[1, 5, 10, 20]
-          .map((days) => data[data.length - days].sharpeRatio?.toFixed(2))
+          .map((days) =>
+            dataWithSharpe[dataWithSharpe.length - days].sharpeRatio?.toFixed(2)
+          )
           .join(' / ')}`
         updateSharpe(ticker.ticker, sharpe)
       })
@@ -57,10 +65,25 @@ export default function useTickerListAdapter() {
     return { addTicker: doAddTicker, removeTicker, doSearch }
   }
 
-  const usePresenter = () => ({
-    tickers: useTickerStore((s) => s.tickers),
-    results,
-  })
+  const usePresenter = () => {
+    const tickers = useTickerStore((s) => s.tickers)
+    const withSharpe = tickers
+      .filter((ticker) => ticker.sharpe)
+      .map((ticker) => {
+        const regExToReplaceNegativeValues = /-\d+\.\d+/g
+        ticker.sharpe = ticker.sharpe!.replace(
+          regExToReplaceNegativeValues,
+          '0.00'
+        )
+        return ticker
+      })
+    const withoutSharpe = tickers.filter((ticker) => !ticker.sharpe)
+    withSharpe.sort((a, b) => parseFloat(b.sharpe!) - parseFloat(a.sharpe!))
+    return {
+      tickers: [...withSharpe, ...withoutSharpe],
+      results,
+    }
+  }
 
   return { useController, usePresenter }
 }
