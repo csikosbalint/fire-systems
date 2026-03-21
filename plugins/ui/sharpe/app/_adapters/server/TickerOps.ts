@@ -21,7 +21,6 @@ export async function search(keyword: string): Promise<Ticker[]> {
         }
       }
       if (result.quotes && result.quotes.length > 0) {
-        console.log('Search found results:', result)
         resolve(
           result.quotes.map((q) => ({
             market: q.exchDisp,

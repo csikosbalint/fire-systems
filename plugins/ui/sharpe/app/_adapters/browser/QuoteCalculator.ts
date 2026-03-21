@@ -23,7 +23,6 @@ export async function calculateMySharpe({
         data: HistoricalData[]
       }
       if (ticker !== ticker) return
-      console.log('Enrichment completed with result:', { ticker, data })
       resolve(data)
     })
     subscribe(EnrichmentEventNames.ERROR, (event) => {
