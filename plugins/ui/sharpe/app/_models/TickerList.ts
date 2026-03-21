@@ -5,7 +5,8 @@ import { calculateMySharpe } from '@adapters/browser/QuoteCalculator'
 import useTickerStore from './TickerStore'
 
 export default function useTickerListAdapter() {
-  const { addTicker, removeTicker, updateSharpe } = useTickerStore()
+  const { addTicker, removeTicker, updateSharpe, updateColor } =
+    useTickerStore()
   const [results, setResults] = useState<Ticker[]>([])
 
   const fetchSharpe = (ticker: Ticker) =>
@@ -67,7 +68,7 @@ export default function useTickerListAdapter() {
         })
     }
 
-    return { addTicker: doAddTicker, removeTicker, doSearch }
+    return { addTicker: doAddTicker, removeTicker, doSearch, updateColor }
   }
 
   const usePresenter = () => {

@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Ticker } from '@shared/types/Ticker'
+import type { Ticker, TickerColor } from '@shared/types/Ticker'
 
 type TickerStore = {
   tickers: Ticker[]
   addTicker: (ticker: Ticker) => void
   removeTicker: (tickerSymbol: string) => void
   updateSharpe: (tickerSymbol: string, sharpe: string) => void
+  updateColor: (tickerSymbol: string, color: TickerColor) => void
 }
 
 const useTickerStore = create<TickerStore>()(
@@ -27,6 +28,12 @@ const useTickerStore = create<TickerStore>()(
         set((state) => ({
           tickers: state.tickers.map((t) =>
             t.ticker === tickerSymbol ? { ...t, sharpe } : t
+          ),
+        })),
+      updateColor: (tickerSymbol, color) =>
+        set((state) => ({
+          tickers: state.tickers.map((t) =>
+            t.ticker === tickerSymbol ? { ...t, color } : t
           ),
         })),
     }),

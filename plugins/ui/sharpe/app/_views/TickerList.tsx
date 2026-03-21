@@ -5,7 +5,7 @@ import TickerInputSection from './components/TickerInputSection'
 
 export default function TickerList() {
   const adapter = useTickerListAdapter()
-  const { addTicker, removeTicker, doSearch } = adapter.useController()
+  const { addTicker, removeTicker, doSearch, updateColor } = adapter.useController()
   const { tickers, results } = adapter.usePresenter()
 
   return (
@@ -22,7 +22,7 @@ export default function TickerList() {
       <TickerInputSection add={(ticker) => addTicker({ ticker })} search={doSearch} results={results} />
 
       {/* Table Section */}
-      <TickerTable tickers={tickers} onRemove={removeTicker} />
+      <TickerTable tickers={tickers} onRemove={removeTicker} onColorChange={updateColor} />
     </div>
   )
 }
