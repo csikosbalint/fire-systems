@@ -11,7 +11,7 @@ export default function useTickerListAdapter() {
 
   const fetchSharpe = (ticker: Ticker) =>
     download({ ticker })
-      .then((data) => data.slice(0, -1)) // Exclude most recent day which may be incomplete
+      .then((data) => data)
       .then((dataWithoutToday) =>
         calculateMySharpe({
           data: dataWithoutToday,
@@ -20,7 +20,7 @@ export default function useTickerListAdapter() {
         })
       )
       .then((dataWithSharpe) => {
-        const sharpe = `${[1, 5, 10, 20]
+        const sharpe = `${[1, 2, 3, 5, 20]
           .map((days) =>
             dataWithSharpe[dataWithSharpe.length - days].sharpeRatio?.toFixed(2)
           )

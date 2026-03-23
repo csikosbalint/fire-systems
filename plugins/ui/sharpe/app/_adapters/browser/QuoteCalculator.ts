@@ -4,7 +4,7 @@ import {
   EnrichmentEventNames,
   HistoricalData,
   mySharpePort,
-} from 'fire-app/ports'
+} from '@csikosbalint/fire-app/ports'
 
 export async function calculateMySharpe({
   data,

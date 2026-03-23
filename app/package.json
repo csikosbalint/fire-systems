@@ -1,11 +1,18 @@
 {
-  "name": "fire-app",
-  "version": "1.0.0",
+  "name": "@csikosbalint/fire-app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/csikosbalint/fire-systems.git",
+    "directory": "app"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "version": "1.0.1",
   "description": "FIRE Application",
   "license": "ISC",
   "author": "Balint Csikos",
   "type": "module",
-  "private": true,
   "main": "dist/index.js",
   "exports": {
     ".": {

@@ -6,6 +6,12 @@
     {
       "path": "plugins/ui/sharpe",
     },
+    {
+      "path": "backtest",
+    },
+    {
+      "path": "data-forge-notebook",
+    },
   ],
   "settings": {
     "debug.javascript.unmapMissingSources": true,

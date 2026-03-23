@@ -1,8 +1,11 @@
 'use server'
 import { Ticker } from '@shared/types/Ticker'
-import { HistoricalData, SearchEventNames } from 'fire-app/ports'
+import { HistoricalData, SearchEventNames } from '@csikosbalint/fire-app/ports'
 
-import { tickerSearchPort, historicalDataPort } from 'fire-app/ports/server'
+import {
+  tickerSearchPort,
+  historicalDataPort,
+} from '@csikosbalint/fire-app/ports/server'
 
 export async function search(keyword: string): Promise<Ticker[]> {
   const { search, subscribe } = tickerSearchPort()

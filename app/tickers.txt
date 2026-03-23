@@ -1,0 +1,12 @@
+IUES.L	iShares S&P 500 Energy Sector UCITS ETF USD (Acc) (ETF)	London	3.47 / 3.13 / 3.25 / 3.12	
+IPLT.L	iShares Physical Platinum ETC (EQUITY)	London	2.23 / 3.53 / 3.64 / 3.78	
+IGLN.L	iShares Physical Gold ETC (EQUITY)	London	2.01 / 3.25 / 3.70 / 5.24	
+ISLN.L	iShares Physical Silver ETC (EQUITY)	London	1.49 / 2.24 / 2.56 / 2.99	
+ITPS.L	iShares $ TIPS UCITS ETF USD (Acc) (ETF)	London	0.67 / 1.03 / 0.78 / 0.62	
+IUIT.L	iShares S&P 500 Information Technology Sector UCITS ETF USD (Acc) (ETF)	London	0.00 / 0.03 / 0.01 / 0.24	
+IUFS.L	iShares S&P 500 Financials Sector UCITS ETF USD (Acc) (ETF)	London	0.00 / 0.00 / 0.00 / 0.00	
+IEMB.L	iShares J.P. Morgan $ EM Bond UCITS ETF USD (Dist) (ETF)	London	0.00 / 0.00 / 0.14 / 2.53	
+IDTM.L	iShares $ Treasury Bond 7-10yr UCITS ETF USD (Dist) (ETF)	London	0.00 / 0.00 / 0.00 / 1.60	
+BTC-USD	Bitcoin USD (CRYPTOCURRENCY)	CCC	0.00 / 0.00 / 0.00 / 0.00	
+ETH-USD	Ethereum USD (CRYPTOCURRENCY)	CCC	0.00 / 0.00 / 0.00 / 0.00	
+XRP-USD	XRP USD (CRYPTOCURRENCY)	CCC	0.00 / 0.00 / 0.00 / 0.00
