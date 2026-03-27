@@ -2,9 +2,10 @@
   "name": "backtest",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
-    "dev": "node index.js",
+    "local": "node -e 'import(\"./index.mjs\").then( loadedModule => loadedModule.local() )'",
+    "aws": "node -e 'import(\"./index.mjs\").then( loadedModule => loadedModule.handler() )'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,5 +16,8 @@
     "@csikosbalint/fire-app": "^1.0.1",
     "chai": "^6.2.2",
     "grademark": "^0.3.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1018.0"
   }
 }
