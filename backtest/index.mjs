@@ -100,6 +100,17 @@ const SNS_TOPIC_ARN = "arn:aws:sns:eu-west-1:327953370525:Alerts";
 export const handler = async (event, context) => {
   const { changes, currentWinner, cooldownRemaining } = await main();
 
+  // TODO(temp): remove once cron is stable — always notify current bestTicker on every run
+  const sns = new SNSClient({ region: "eu-west-1" });
+  await sns.send(
+    new PublishCommand({
+      TopicArn: SNS_TOPIC_ARN,
+      Subject: "bestTicker status",
+      Message: `Current best ticker: ${currentWinner} (cooldown remaining: ${cooldownRemaining} days).`,
+    }),
+  );
+  console.log(`SNS status published: currentWinner=${currentWinner}`);
+
   const ssm = new SSMClient();
 
   // Read current SSM value
@@ -119,7 +130,6 @@ export const handler = async (event, context) => {
   }
 
   // Publish SNS alert
-  const sns = new SNSClient({ region: "eu-west-1" });
   await sns.send(
     new PublishCommand({
       TopicArn: SNS_TOPIC_ARN,

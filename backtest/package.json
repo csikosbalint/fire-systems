@@ -6,6 +6,7 @@
   "scripts": {
     "local": "node -e 'import(\"./index.mjs\").then( loadedModule => loadedModule.local() )'",
     "aws": "node -e 'import(\"./index.mjs\").then( loadedModule => loadedModule.handler() )'",
+    "deploy": "bash lambda.sh",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
