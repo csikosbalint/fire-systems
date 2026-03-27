@@ -1,7 +1,12 @@
 import { mySharpePort } from "@csikosbalint/fire-app/ports";
 import { historicalDataPort } from "@csikosbalint/fire-app/ports/server";
 import { writeFileSync } from "fs";
-import { DynamoDBClient, ListTablesCommand } from "@aws-sdk/client-dynamodb";
+import {
+  SSMClient,
+  GetParameterCommand,
+  PutParameterCommand,
+} from "@aws-sdk/client-ssm";
+import { SNSClient, PublishCommand } from "@aws-sdk/client-sns";
 
 // yahoo: symbol used for Yahoo Finance API download
 // output: symbol used in output.csv (backtest tool convention)
@@ -17,7 +22,7 @@ const TICKERS = [
 const LOOKBACK = 125; // ~1 year of trading days for sharpeRatio calculation
 const COOLDOWN_DAYS = 22; // ~1 month of trading days
 const YEARS_OF_DATA = 10; // how many years of historical data to fetch (must be > LOOKBACK)
-const OUTPUT_FILE = `./${Date.now().toString()}output_${YEARS_OF_DATA}_${LOOKBACK}_${COOLDOWN_DAYS}.csv`;
+const OUTPUT_FILE = `./allocations/${Date.now().toString()}output_${YEARS_OF_DATA}_${LOOKBACK}_${COOLDOWN_DAYS}.csv`;
 
 async function main() {
   const { augment } = mySharpePort();
@@ -82,7 +87,64 @@ async function main() {
     }
   }
 
-  // Phase 4 — write CSV (use output symbols for header and columns)
+  return {
+    changes,
+    currentWinner,
+    cooldownRemaining,
+  };
+}
+
+const SSM_PARAM = "/alerts/bestTicker";
+const SNS_TOPIC_ARN = "arn:aws:sns:eu-west-1:327953370525:Alerts";
+
+export const handler = async (event, context) => {
+  const { changes, currentWinner, cooldownRemaining } = await main();
+
+  const ssm = new SSMClient();
+
+  // Read current SSM value
+  let previousWinner = null;
+  try {
+    const { Parameter } = await ssm.send(
+      new GetParameterCommand({ Name: SSM_PARAM }),
+    );
+    previousWinner = Parameter.Value;
+  } catch (err) {
+    if (err.name !== "ParameterNotFound") throw err;
+  }
+
+  if (currentWinner === previousWinner) {
+    console.log(`No change: ${SSM_PARAM} is already ${currentWinner}`);
+    return { currentWinner, cooldownRemaining, changed: false };
+  }
+
+  // Publish SNS alert
+  const sns = new SNSClient({ region: "eu-west-1" });
+  await sns.send(
+    new PublishCommand({
+      TopicArn: SNS_TOPIC_ARN,
+      Subject: "Best Ticker Changed",
+      Message: `Best ticker changed from ${previousWinner} to ${currentWinner}.`,
+    }),
+  );
+  console.log(`SNS alert published: ${previousWinner} → ${currentWinner}`);
+
+  // Update SSM param
+  await ssm.send(
+    new PutParameterCommand({
+      Name: SSM_PARAM,
+      Value: currentWinner,
+      Type: "String",
+      Overwrite: true,
+    }),
+  );
+  console.log(`SSM ${SSM_PARAM} updated to: ${currentWinner}`);
+
+  return { currentWinner, cooldownRemaining, changed: true };
+};
+
+export const local = async () => {
+  const { changes, currentWinner, cooldownRemaining } = await main();
   const outputKeys = TICKERS.map((t) => t.output);
   const header = ["Start Date", ...outputKeys].join(",");
   const rows = changes.map(({ date, winner }) => {
@@ -92,28 +154,8 @@ async function main() {
     const cols = outputKeys.map((k) => (k === winner ? "100%" : ""));
     return [formattedDate, ...cols].join(",");
   });
-
   const csv = [header, ...rows].join("\n") + "\n";
-  return {
-    csv,
-    currentWinner,
-    cooldownRemaining,
-  };
-}
 
-export const handler = async (event, context) => {
-  const client = new DynamoDBClient({ region: "us-west-2" });
-  const command = new ListTablesCommand({});
-  try {
-    const results = await client.send(command);
-    console.log(results.TableNames.join("\n"));
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-export const local = async () => {
-  const { csv, currentWinner, cooldownRemaining } = await main();
   writeFileSync(OUTPUT_FILE, csv);
   console.log(`Written to ${OUTPUT_FILE}`);
   console.log(`Current winner: ${currentWinner}`);
