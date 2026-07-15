@@ -8,7 +8,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
   },
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "FIRE Application",
   "license": "ISC",
   "author": "Balint Csikos",
@@ -55,6 +55,6 @@
   "dependencies": {
     "@railpath/finance-toolkit": "^0.5.4",
     "awilix": "^13.0.1",
-    "yahoo-finance2": "^3.13.2"
+    "yahoo-finance2": "^4.0.0"
   }
 }
