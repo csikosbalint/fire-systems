@@ -1,12 +1,16 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Ticker, TickerColor } from '@shared/types/Ticker'
+import type { SharpeTimeSeries, Ticker, TickerColor } from '@shared/types/Ticker'
 
 type TickerStore = {
   tickers: Ticker[]
   addTicker: (ticker: Ticker) => void
   removeTicker: (tickerSymbol: string) => void
   updateSharpe: (tickerSymbol: string, sharpe: string) => void
+  updateSharpeTimeSeries: (
+    tickerSymbol: string,
+    sharpeTimeSeries: SharpeTimeSeries
+  ) => void
   updateColor: (tickerSymbol: string, color: TickerColor) => void
 }
 
@@ -30,6 +34,12 @@ const useTickerStore = create<TickerStore>()(
             t.ticker === tickerSymbol ? { ...t, sharpe } : t
           ),
         })),
+      updateSharpeTimeSeries: (tickerSymbol, sharpeTimeSeries) =>
+        set((state) => ({
+          tickers: state.tickers.map((t) =>
+            t.ticker === tickerSymbol ? { ...t, sharpeTimeSeries } : t
+          ),
+        })),
       updateColor: (tickerSymbol, color) =>
         set((state) => ({
           tickers: state.tickers.map((t) =>
@@ -39,9 +49,14 @@ const useTickerStore = create<TickerStore>()(
     }),
     {
       name: 'ticker-list',
-      // Strip sharpe before writing to localStorage — it is re-computed on load
+      // Strip computed sharpe fields before writing to localStorage — recomputed on load
       partialize: (state) => ({
-        tickers: state.tickers.map(({ sharpe: _sharpe, ...rest }) => rest),
+        tickers: state.tickers.map((ticker) => {
+          // Strip computed fields before localStorage; recomputed on load.
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { sharpe, sharpeTimeSeries, ...rest } = ticker
+          return rest
+        }),
       }),
     }
   )

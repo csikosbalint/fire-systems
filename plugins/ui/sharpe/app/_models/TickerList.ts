@@ -1,12 +1,47 @@
 import { useEffect, useRef, useState } from 'react'
-import { Ticker } from '@shared/types/Ticker'
+import { SharpeTimeSeries, Ticker } from '@shared/types/Ticker'
 import { search, download } from '@adapters/server/TickerOps'
 import { calculateMySharpe } from '@adapters/browser/QuoteCalculator'
 import useTickerStore from './TickerStore'
 
+const FISCAL_DAYS = 250
+
+function formatDate(date: string | Date): string {
+  if (date instanceof Date) {
+    return date.toISOString().slice(0, 10)
+  }
+  const parsed = new Date(date)
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString().slice(0, 10)
+  }
+  return String(date)
+}
+
+function clampSharpe(value: number): number {
+  return value < 0 ? 0 : Number(value.toFixed(2))
+}
+
+function toTimeSeries(
+  dataWithSharpe: { date: string | Date; sharpeRatio?: number }[]
+): SharpeTimeSeries {
+  const withRatio = dataWithSharpe.filter(
+    (d) => d.sharpeRatio !== undefined && d.sharpeRatio !== null
+  )
+  const window = withRatio.slice(-FISCAL_DAYS)
+  return {
+    dates: window.map((d) => formatDate(d.date)),
+    values: window.map((d) => clampSharpe(d.sharpeRatio as number)),
+  }
+}
+
 export default function useTickerListAdapter() {
-  const { addTicker, removeTicker, updateSharpe, updateColor } =
-    useTickerStore()
+  const {
+    addTicker,
+    removeTicker,
+    updateSharpe,
+    updateSharpeTimeSeries,
+    updateColor,
+  } = useTickerStore()
   const [results, setResults] = useState<Ticker[]>([])
 
   const fetchSharpe = (ticker: Ticker) =>
@@ -20,12 +55,17 @@ export default function useTickerListAdapter() {
         })
       )
       .then((dataWithSharpe) => {
-        const sharpe = `${[1, 2, 3, 5, 20]
-          .map((days) =>
-            dataWithSharpe[dataWithSharpe.length - days].sharpeRatio?.toFixed(2)
-          )
-          .join(' / ')}`
+        const timeSeries = toTimeSeries(dataWithSharpe)
+        const latest =
+          timeSeries.values.length > 0
+            ? timeSeries.values[timeSeries.values.length - 1]
+            : undefined
+        const sharpe = latest !== undefined ? latest.toFixed(2) : 'N/A'
+
         updateSharpe(ticker.ticker, sharpe)
+        if (timeSeries.dates.length > 0) {
+          updateSharpeTimeSeries(ticker.ticker, timeSeries)
+        }
       })
       .catch((e) => {
         console.error(
@@ -76,18 +116,28 @@ export default function useTickerListAdapter() {
     const withSharpe = tickers
       .filter((ticker) => ticker.sharpe)
       .map((ticker) => {
-        const regExToReplaceNegativeValues = /-\d+\.\d+/g
-        ticker.sharpe = ticker.sharpe!.replace(
-          regExToReplaceNegativeValues,
-          '0.00'
-        )
-        return ticker
+        // Keep only the first value if older multi-value strings are still present.
+        const raw = ticker.sharpe!.split('/')[0].trim()
+        const num = parseFloat(raw)
+        const display = Number.isFinite(num) && num < 0 ? '0.00' : raw
+        return { ...ticker, sharpe: display }
       })
     const withoutSharpe = tickers.filter((ticker) => !ticker.sharpe)
     withSharpe.sort((a, b) => parseFloat(b.sharpe!) - parseFloat(a.sharpe!))
+    const sorted = [...withSharpe, ...withoutSharpe]
+    const pendingCount = sorted.filter((t) => !t.sharpe).length
+    const hasAnySeries = sorted.some(
+      (t) => t.sharpeTimeSeries && t.sharpeTimeSeries.dates.length > 0
+    )
+
     return {
-      tickers: [...withSharpe, ...withoutSharpe],
+      tickers: sorted,
       results,
+      chart: {
+        tickers: sorted,
+        isLoading: pendingCount > 0 && !hasAnySeries,
+        isPartialLoading: pendingCount > 0 && hasAnySeries,
+      },
     }
   }
 
