@@ -46,13 +46,21 @@ export async function search(keyword: string): Promise<Ticker[]> {
 
 export async function download({
   ticker,
+  startDate,
+  endDate,
 }: {
   ticker: Ticker
+  startDate?: Date
+  endDate?: Date
 }): Promise<HistoricalData[]> {
   const { retrieve } = historicalDataPort()
-  const startDate = new Date()
-  startDate.setFullYear(startDate.getFullYear() - 2) // 2 years ago
-  const endDate = new Date()
+  const requestedStartDate = startDate ?? new Date()
+  if (!startDate) requestedStartDate.setFullYear(requestedStartDate.getFullYear() - 2)
+  const requestedEndDate = endDate ?? new Date()
 
-  return retrieve({ ticker: ticker.ticker, startDate, endDate })
+  return retrieve({
+    ticker: ticker.ticker,
+    startDate: requestedStartDate,
+    endDate: requestedEndDate,
+  })
 }
