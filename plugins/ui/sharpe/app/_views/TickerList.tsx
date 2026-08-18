@@ -12,7 +12,7 @@ export default function TickerList() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto pr-1">
-        <div className="border-b border-border pb-4">
+        <div className="pb-4">
           <h2 className="text-2xl font-semibold tracking-tight">Watchlist</h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Enter keyword to add tickers to your portfolio
@@ -25,18 +25,16 @@ export default function TickerList() {
           results={results}
         />
 
-        <TickerTable
-          tickers={tickers}
-          onRemove={removeTicker}
-          onColorChange={updateColor}
-        />
-      </div>
-
-      <div className="mt-4 shrink-0 border-t border-border pt-3">
         <SharpeChart
           tickers={chart.tickers}
           isLoading={chart.isLoading}
           isPartialLoading={chart.isPartialLoading}
+        />
+
+        <TickerTable
+          tickers={tickers}
+          onRemove={removeTicker}
+          onColorChange={updateColor}
         />
       </div>
     </div>
