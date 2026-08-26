@@ -80,8 +80,11 @@ export default function DisciplineTrackerChart({
     const chart = chartRef.current
     if (!element || !chart) return
     const colors = theme(element)
-    const pivotDates = pivots
+    const actualPivotDates = pivots
       .map((pivot) => pivot.date)
+      .filter((date) => dates.includes(date))
+    const alertPivotDates = pivots
+      .flatMap((pivot) => (pivot.alertDate ? [pivot.alertDate] : []))
       .filter((date) => dates.includes(date))
 
     if (isLoading || error || dates.length === 0 || series.length === 0) {
@@ -157,19 +160,32 @@ export default function DisciplineTrackerChart({
           itemStyle: { color: portfolio ? colors.foreground : COLORS[index % COLORS.length] },
           z: portfolio ? 5 : 1,
           emphasis: { focus: 'series' as const },
-          ...(portfolio && pivotDates.length > 0
+          ...(portfolio && (actualPivotDates.length > 0 || alertPivotDates.length > 0)
             ? {
                 markLine: {
                   symbol: 'none',
                   silent: true,
                   label: { show: false },
-                  lineStyle: {
-                    color: colors.muted,
-                    type: 'dotted' as const,
-                    width: 1,
-                    opacity: 0.75,
-                  },
-                  data: pivotDates.map((date) => ({ xAxis: date })),
+                  data: [
+                    ...actualPivotDates.map((date) => ({
+                      xAxis: date,
+                      lineStyle: {
+                        color: colors.muted,
+                        type: 'solid' as const,
+                        width: 1,
+                        opacity: 0.65,
+                      },
+                    })),
+                    ...alertPivotDates.map((date) => ({
+                      xAxis: date,
+                      lineStyle: {
+                        color: colors.muted,
+                        type: 'dotted' as const,
+                        width: 1,
+                        opacity: 0.9,
+                      },
+                    })),
+                  ],
                 },
               }
             : {}),

@@ -20,14 +20,24 @@ const useDisciplineTrackerStore = create<DisciplineTrackerStore>()(
         set({ initialCapital })
       },
       addPivot: (pivot) => {
-        if (get().pivots.some((existing) => existing.date === pivot.date)) {
+        if (pivot.alertDate && pivot.alertDate > pivot.date) {
           return false
         }
-        set((state) => ({
-          pivots: [...state.pivots, pivot].sort((left, right) =>
-            left.date.localeCompare(right.date)
-          ),
-        }))
+        const nextPivots = [...get().pivots, pivot].sort((left, right) =>
+          left.date.localeCompare(right.date)
+        )
+        if (
+          nextPivots.some(
+            (existing, index) =>
+              (existing.id !== pivot.id && existing.date === pivot.date) ||
+              (index > 0 &&
+                (existing.alertDate ?? existing.date) <=
+                  (nextPivots[index - 1].alertDate ?? nextPivots[index - 1].date))
+          )
+        ) {
+          return false
+        }
+        set({ pivots: nextPivots })
         return true
       },
       removePivot: (pivotId) =>

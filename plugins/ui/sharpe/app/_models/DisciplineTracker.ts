@@ -33,9 +33,12 @@ function uniqueTickers(pivots: TrackerPivot[]): Ticker[] {
   )
 }
 
-function earliestPivotDate(pivots: TrackerPivot[]): Date | undefined {
-  const first = [...pivots].sort((left, right) => left.date.localeCompare(right.date))[0]
-  return first ? new Date(`${first.date}T00:00:00.000Z`) : undefined
+function earliestEffectiveDate(pivots: TrackerPivot[]): Date | undefined {
+  const earliest = pivots.reduce<string | undefined>((date, pivot) => {
+    const effectiveDate = pivot.alertDate ?? pivot.date
+    return !date || effectiveDate < date ? effectiveDate : date
+  }, undefined)
+  return earliest ? new Date(`${earliest}T00:00:00.000Z`) : undefined
 }
 
 export default function useDisciplineTrackerAdapter() {
@@ -89,7 +92,7 @@ export default function useDisciplineTrackerAdapter() {
 
       setIsLoading(true)
       setError(null)
-      const startDate = earliestPivotDate(pivots)
+      const startDate = earliestEffectiveDate(pivots)
 
       Promise.all(
         tickers.map(async (ticker) => [

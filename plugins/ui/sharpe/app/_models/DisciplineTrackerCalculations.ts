@@ -31,15 +31,12 @@ function pricesForTicker(
   return pricesByTicker[ticker] ?? []
 }
 
-export function calculateTracker(
+function calculateSchedule(
   initialCapital: number,
   pivots: TrackerPivot[],
-  pricesByTicker: Record<string, PricePoint[]>
-): TrackerCalculation {
-  if (!Number.isFinite(initialCapital) || initialCapital <= 0 || pivots.length === 0) {
-    return { holdings: [], summary: null }
-  }
-
+  pricesByTicker: Record<string, PricePoint[]>,
+  dateForPivot: (pivot: TrackerPivot) => string
+): { holdings: HoldingPeriod[]; summary: PortfolioSummary | null } {
   const orderedPivots = [...pivots].sort((left, right) => left.date.localeCompare(right.date))
   let portfolioValue = initialCapital
   const holdings: HoldingPeriod[] = []
@@ -48,9 +45,9 @@ export function calculateTracker(
     const pivot = orderedPivots[index]
     const nextPivot = orderedPivots[index + 1]
     const tickerPrices = pricesForTicker(pricesByTicker, pivot.ticker.ticker)
-    const purchase = priceOnOrAfter(tickerPrices, pivot.date)
+    const purchase = priceOnOrAfter(tickerPrices, dateForPivot(pivot))
     const exit = nextPivot
-      ? priceOnOrAfter(tickerPrices, nextPivot.date)
+      ? priceOnOrAfter(tickerPrices, dateForPivot(nextPivot))
       : latestPrice(tickerPrices)
 
     if (!purchase || !exit) continue
@@ -71,15 +68,70 @@ export function calculateTracker(
     portfolioValue = endValue
   }
 
-  const summary: PortfolioSummary | null = holdings.length
-    ? {
-        currentValue: portfolioValue,
-        profit: portfolioValue - initialCapital,
-        profitPercent: ((portfolioValue - initialCapital) / initialCapital) * 100,
-      }
-    : null
+  return {
+    holdings,
+    summary: holdings.length
+      ? {
+          currentValue: portfolioValue,
+          profit: portfolioValue - initialCapital,
+          profitPercent: ((portfolioValue - initialCapital) / initialCapital) * 100,
+        }
+      : null,
+  }
+}
 
-  return { holdings, summary }
+export function calculateTracker(
+  initialCapital: number,
+  pivots: TrackerPivot[],
+  pricesByTicker: Record<string, PricePoint[]>
+): TrackerCalculation {
+  if (!Number.isFinite(initialCapital) || initialCapital <= 0 || pivots.length === 0) {
+    return { holdings: [], summary: null, delayComparisons: {} }
+  }
+
+  const actual = calculateSchedule(initialCapital, pivots, pricesByTicker, (pivot) => pivot.date)
+  const delayComparisons = Object.fromEntries(
+    actual.holdings.flatMap((holding) => {
+      const alertDate = holding.pivot.alertDate
+      if (!alertDate) return []
+
+      const alertPurchase = priceOnOrAfter(
+        pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker),
+        alertDate
+      )
+      const actualPurchase = priceOnOrAfter(
+        pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker),
+        holding.pivot.date
+      )
+      const actualExit = priceOnOrAfter(
+        pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker),
+        holding.endDate
+      )
+      if (!alertPurchase || !actualPurchase || !actualExit) return []
+
+      const alertEndValue =
+        holding.startValue * (actualExit.price / alertPurchase.price)
+      const alertProfit = alertEndValue - holding.startValue
+      const alertProfitPercent = (alertProfit / holding.startValue) * 100
+
+      return [[
+        holding.pivot.id,
+        {
+          alertDate: alertPurchase.date,
+          alertProfit,
+          alertProfitPercent,
+          profitDelta: alertProfit - holding.profit,
+          profitPercentDelta: alertProfitPercent - holding.profitPercent,
+        },
+      ]]
+    })
+  )
+
+  return {
+    holdings: actual.holdings,
+    summary: actual.summary,
+    delayComparisons,
+  }
 }
 
 function normalizeSeries(

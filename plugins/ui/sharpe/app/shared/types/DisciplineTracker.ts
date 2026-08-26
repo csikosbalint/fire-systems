@@ -3,6 +3,7 @@ import type { Ticker } from './Ticker'
 export type TrackerPivot = {
   id: string
   date: string
+  alertDate?: string
   ticker: Ticker
 }
 
@@ -21,6 +22,14 @@ export type HoldingPeriod = {
   profitPercent: number
 }
 
+export type PivotDelayComparison = {
+  alertDate: string
+  alertProfit: number
+  alertProfitPercent: number
+  profitDelta: number
+  profitPercentDelta: number
+}
+
 export type PortfolioSummary = {
   currentValue: number
   profit: number
@@ -36,4 +45,5 @@ export type ChartSeries = {
 export type TrackerCalculation = {
   holdings: HoldingPeriod[]
   summary: PortfolioSummary | null
+  delayComparisons: Record<string, PivotDelayComparison>
 }
