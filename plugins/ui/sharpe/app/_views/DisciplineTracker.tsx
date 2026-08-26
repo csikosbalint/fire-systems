@@ -26,6 +26,7 @@ export default function DisciplineTracker() {
   const { initialCapital, pivots, results, calculation, chart } = adapter.usePresenter()
   const [capitalInput, setCapitalInput] = useState(String(initialCapital))
   const [pivotDate, setPivotDate] = useState(today)
+  const [alertDate, setAlertDate] = useState('')
   const [ticker, setTicker] = useState<Ticker | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
 
@@ -53,9 +54,14 @@ export default function DisciplineTracker() {
       setFormError('Choose a valid date that is not in the future.')
       return
     }
+    if (alertDate && (alertDate > pivotDate || alertDate > today())) {
+      setFormError('Alert date must be on or before the actual pivot date.')
+      return
+    }
     const added = addPivot({
       id: crypto.randomUUID(),
       date: pivotDate,
+      ...(alertDate ? { alertDate } : {}),
       ticker,
     })
     if (!added) {
@@ -64,6 +70,7 @@ export default function DisciplineTracker() {
     }
     setTicker(null)
     setPivotDate(today())
+    setAlertDate('')
     setFormError(null)
     clearSearch()
   }
@@ -97,15 +104,32 @@ export default function DisciplineTracker() {
       </div>
 
       <form onSubmit={addTransaction} className="space-y-2">
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <input
-            type="date"
-            max={today()}
-            value={pivotDate}
-            onChange={(event) => setPivotDate(event.target.value)}
-            aria-label="Pivot date"
-            className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
-          />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <label className="grid gap-1 text-xs text-muted-foreground">
+            Actual pivot
+            <input
+              type="date"
+              max={today()}
+              value={pivotDate}
+              onChange={(event) => setPivotDate(event.target.value)}
+              aria-label="Actual pivot date"
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
+            />
+          </label>
+          <label className="grid gap-1 text-xs text-muted-foreground">
+            Alert date
+            <input
+              type="date"
+              max={pivotDate || today()}
+              value={alertDate}
+              onChange={(event) => {
+                setAlertDate(event.target.value)
+                setFormError(null)
+              }}
+              aria-label="Alert date (optional)"
+              className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
+            />
+          </label>
           <TrackerTickerInput
             results={results}
             onSearch={searchTickers}
