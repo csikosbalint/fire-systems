@@ -134,11 +134,6 @@ export default function DisciplineTrackerTable({
                 <TableCell className={`text-right ${holding ? resultClass(holding.profit) : ''}`}>
                   {holding ? currency.format(holding.profit) : '—'}
                 </TableCell>
-                {hasAlerts && (
-                  <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitDelta) : ''}`}>
-                    {delayComparison ? currency.format(delayComparison.profitDelta) : '—'}
-                  </TableCell>
-                )}
                 <TableCell className={`text-right ${holding ? resultClass(holding.profit) : ''}`}>
                   {holding ? percentage.format(holding.profitPercent / 100) : '—'}
                 </TableCell>
