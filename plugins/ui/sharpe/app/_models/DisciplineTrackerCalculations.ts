@@ -110,7 +110,7 @@ export function calculateTracker(
         previousHolding.startValue *
         (previousAlertExit.price / previousEntry.price) *
         (newActualEntry.price / newAlertEntry.price)
-      const profitDelta = hypotheticalEndValue - previousHolding.endValue
+      const profitDelta = previousHolding.endValue - hypotheticalEndValue
       const profitPercentDelta = (profitDelta / previousHolding.startValue) * 100
 
       return [[
