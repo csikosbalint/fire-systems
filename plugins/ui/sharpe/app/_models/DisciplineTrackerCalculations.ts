@@ -91,37 +91,34 @@ export function calculateTracker(
 
   const actual = calculateSchedule(initialCapital, pivots, pricesByTicker, (pivot) => pivot.date)
   const delayComparisons = Object.fromEntries(
-    actual.holdings.flatMap((holding) => {
+    actual.holdings.flatMap((holding, index) => {
       const alertDate = holding.pivot.alertDate
-      if (!alertDate) return []
+      const previousHolding = actual.holdings[index - 1]
+      // the delay affects the previous (already-closed) holding's exit, not this one
+      if (!alertDate || !previousHolding) return []
 
-      const alertPurchase = priceOnOrAfter(
-        pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker),
-        alertDate
-      )
-      const actualPurchase = priceOnOrAfter(
-        pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker),
-        holding.pivot.date
-      )
-      const actualExit = priceOnOrAfter(
-        pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker),
-        holding.endDate
-      )
-      if (!alertPurchase || !actualPurchase || !actualExit) return []
+      const previousTickerPrices = pricesForTicker(pricesByTicker, previousHolding.pivot.ticker.ticker)
+      const newTickerPrices = pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker)
 
-      const alertEndValue =
-        holding.startValue * (actualExit.price / alertPurchase.price)
-      const alertProfit = alertEndValue - holding.startValue
-      const alertProfitPercent = (alertProfit / holding.startValue) * 100
+      const previousEntry = priceOnOrAfter(previousTickerPrices, previousHolding.startDate)
+      const previousAlertExit = priceOnOrAfter(previousTickerPrices, alertDate)
+      const newAlertEntry = priceOnOrAfter(newTickerPrices, alertDate)
+      const newActualEntry = priceOnOrAfter(newTickerPrices, holding.pivot.date)
+      if (!previousEntry || !previousAlertExit || !newAlertEntry || !newActualEntry) return []
+
+      const hypotheticalEndValue =
+        previousHolding.startValue *
+        (previousAlertExit.price / previousEntry.price) *
+        (newActualEntry.price / newAlertEntry.price)
+      const profitDelta = hypotheticalEndValue - previousHolding.endValue
+      const profitPercentDelta = (profitDelta / previousHolding.startValue) * 100
 
       return [[
-        holding.pivot.id,
+        previousHolding.pivot.id,
         {
-          alertDate: alertPurchase.date,
-          alertProfit,
-          alertProfitPercent,
-          profitDelta: alertProfit - holding.profit,
-          profitPercentDelta: alertProfitPercent - holding.profitPercent,
+          alertDate: previousAlertExit.date,
+          profitDelta,
+          profitPercentDelta,
         },
       ]]
     })
