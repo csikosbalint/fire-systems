@@ -81,15 +81,15 @@ export default function DisciplineTrackerTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Actual Date</TableHead>
-            {hasAlerts && <TableHead className="text-right">Delay</TableHead>}
+            <TableHead>Start Date</TableHead>
+            <TableHead className="text-right">End Date</TableHead>
             <TableHead>Ticker</TableHead>
-            <TableHead className="text-right">End</TableHead>
             <TableHead className="text-right">Held</TableHead>
             <TableHead className="text-right">Value</TableHead>
             <TableHead className="text-right">Profit</TableHead>
-            {hasAlerts && <TableHead className="text-right">Δ Profit</TableHead>}
             <TableHead className="text-right">Return</TableHead>
+            {hasAlerts && <TableHead className="text-right">Delay</TableHead>}
+            {hasAlerts && <TableHead className="text-right">Δ Profit</TableHead>}
             {hasAlerts && (
               <>
                 <TableHead className="text-right">Δ Return</TableHead>
@@ -113,26 +113,15 @@ export default function DisciplineTrackerTable({
                 : undefined
             return (
               <TableRow key={pivot.id}>
-                <TableCell>{pivot.date}</TableCell>
-                {hasAlerts && (
-                  <TableCell
-                    className={`text-right ${
-                      delayDays !== undefined && delayDays > 4
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-muted-foreground'
-                    }`}
-                  >
-                    {pivotDelay ?? '—'}
-                  </TableCell>
-                )}
+                <TableCell>{holding?.startDate ?? (isLoading ? 'Loading' : 'Unavailable')}</TableCell>
+                <TableCell className="text-right text-muted-foreground">
+                  {holding?.endDate ?? (isLoading ? 'Loading' : 'Unavailable')}
+                </TableCell>
                 <TableCell>
                   <div className="font-mono text-sm">{pivot.ticker.ticker}</div>
                   <div className="max-w-32 truncate text-xs text-muted-foreground">
                     {pivot.ticker.name}
                   </div>
-                </TableCell>
-                <TableCell className="text-right text-muted-foreground">
-                  {holding?.endDate ?? (isLoading ? 'Loading' : 'Unavailable')}
                 </TableCell>
                 <TableCell className="text-right text-muted-foreground">
                   {holding
@@ -153,6 +142,22 @@ export default function DisciplineTrackerTable({
                 <TableCell className={`text-right ${holding ? resultClass(holding.profit) : ''}`}>
                   {holding ? percentage.format(holding.profitPercent / 100) : '—'}
                 </TableCell>
+                {hasAlerts && (
+                  <TableCell
+                    className={`text-right ${
+                      delayDays !== undefined && delayDays > 4
+                        ? 'text-red-600 dark:text-red-400'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {pivotDelay ?? '—'}
+                  </TableCell>
+                )}
+                {hasAlerts && (
+                  <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitDelta) : ''}`}>
+                    {delayComparison ? currency.format(delayComparison.profitDelta) : '—'}
+                  </TableCell>
+                )}
                 {hasAlerts && (
                   <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitPercentDelta) : ''}`}>
                     {delayComparison
@@ -178,17 +183,18 @@ export default function DisciplineTrackerTable({
         {calculation.summary && (
           <TableFooter>
             <TableRow>
-              <TableCell colSpan={hasAlerts ? 5 : 4}>Total</TableCell>
+              <TableCell colSpan={4}>Total</TableCell>
               <TableCell className="text-right">
                 {currency.format(calculation.summary.currentValue)}
               </TableCell>
               <TableCell className={`text-right ${resultClass(calculation.summary.profit)}`}>
                 {currency.format(calculation.summary.profit)}
               </TableCell>
-              {hasAlerts && <TableCell />}
               <TableCell className={`text-right ${resultClass(calculation.summary.profit)}`}>
                 {percentage.format(calculation.summary.profitPercent / 100)}
               </TableCell>
+              {hasAlerts && <TableCell />}
+              {hasAlerts && <TableCell />}
               {hasAlerts && <TableCell />}
               <TableCell />
             </TableRow>
