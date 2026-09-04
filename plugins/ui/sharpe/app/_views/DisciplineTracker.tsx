@@ -109,7 +109,6 @@ export default function DisciplineTracker() {
             Actual pivot
             <input
               type="date"
-              max={today()}
               value={pivotDate}
               onChange={(event) => setPivotDate(event.target.value)}
               aria-label="Actual pivot date"
