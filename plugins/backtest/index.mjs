@@ -15,9 +15,22 @@ const TICKERS = [
   { yahoo: "IUES.L", portfoliovisualizer: "IUES:GB", profit: "acc", desc: "s&p energy sector", class: "stock", currency: "USD", market: "LSE" },
   { yahoo: "IUIT.L", portfoliovisualizer: "IUIT:GB", profit: "acc", desc: "s&p infotech sector", class: "stocks", currency: "USD", market: "LSE" },
   { yahoo: "IUFS.L", portfoliovisualizer: "IUFS:GB", profit: "acc", desc: "s&p finance sector", class: "stocks", currency: "USD", market: "LSE" },
+  { inPortfolio: [
+      { start: "2026-10-08"}
+    ], yahoo: "IUHC.L", portfoliovisualizer: "IUHC:GB", profit: "acc", desc: "s&p healthcare sector", class: "stocks", currency: "USD", market: "LSE"},
   { yahoo: "IEMB.L", portfoliovisualizer: "IEMB:GB", profit: "dist", desc: "emerging markets", class: "bonds", currency: "USD", market: "LSE" },
   { yahoo: "IDTM.L", portfoliovisualizer: "IDTM:GB", profit: "dist", desc: "developed markets", class: "bonds", currency: "USD", market: "LSE" },
 ];
+const toDateStr = (d) => new Date(d).toISOString().split("T")[0];
+
+function isInPortfolio({ inPortfolio }, dateStr) {
+  if (!inPortfolio?.length) return true;
+  return inPortfolio.some(
+    ({ start, end } = {}) =>
+      (start == null || dateStr >= toDateStr(start)) && (end == null || dateStr <= toDateStr(end)),
+  );
+}
+
 const LOOKBACK = 125; // ~1 year of trading days for sharpeRatio calculation
 const COOLDOWN_DAYS = 22; // ~1 month of trading days
 const YEARS_OF_DATA = 10; // how many years of historical data to fetch (must be > LOOKBACK)
@@ -65,13 +78,13 @@ async function main() {
   for (const date of sortedDates) {
     const sharpes = dateMap[date] ?? {};
 
-    const portfoliovisualizerKeys = TICKERS.map((t) => t.portfoliovisualizer);
+    const candidateKeys = TICKERS.filter((t) => isInPortfolio(t, date)).map((t) => t.portfoliovisualizer);
 
     // Skip dates where no ticker has a real sharpeRatio (warmup period)
-    if (portfoliovisualizerKeys.every((k) => sharpes[k]?.sharpeRatio == null)) continue;
+    if (candidateKeys.every((k) => sharpes[k]?.sharpeRatio == null)) continue;
 
     // Find best ticker; undefined/missing sharpeRatio treated as -Infinity
-    const bestTicker = portfoliovisualizerKeys.reduce((best, key) => {
+    const bestTicker = candidateKeys.reduce((best, key) => {
       const s = sharpes[key]?.sharpeRatio ?? -Infinity;
       const bestS = sharpes[best]?.sharpeRatio ?? -Infinity;
       return s > bestS ? key : best;
@@ -95,21 +108,12 @@ async function main() {
 
 const SSM_PARAM = "/alerts/bestTicker";
 const SNS_TOPIC_ARN = "arn:aws:sns:eu-west-1:327953370525:Alerts";
+const USERS_TOPIC_ARN = "arn:aws:sns:eu-west-1:327953370525:Users";
 
 export const handler = async (event, context) => {
   const { changes, currentWinner, cooldownRemaining } = await main();
 
-  // TODO(temp): remove once cron is stable — always notify current bestTicker on every run
   const sns = new SNSClient({ region: "eu-west-1" });
-  await sns.send(
-    new PublishCommand({
-      TopicArn: SNS_TOPIC_ARN,
-      Subject: "bestTicker status",
-      Message: `Current best ticker: ${currentWinner} (cooldown remaining: ${cooldownRemaining} days).`,
-    }),
-  );
-  console.log(`SNS status published: currentWinner=${currentWinner}`);
-
   const ssm = new SSMClient();
 
   // Read current SSM value
@@ -122,6 +126,15 @@ export const handler = async (event, context) => {
   } catch (err) {
     if (err.name !== "ParameterNotFound") throw err;
   }
+
+  await sns.send(
+    new PublishCommand({
+      TopicArn: USERS_TOPIC_ARN,
+      Subject: "bestTicker status",
+      Message: `Current best ticker: ${currentWinner} (cooldown remaining: ${cooldownRemaining} days).`,
+    }),
+  );
+  console.log(`SNS status published: currentWinner=${currentWinner}`);
 
   if (currentWinner === previousWinner) {
     console.log(`No change: ${SSM_PARAM} is already ${currentWinner}`);
