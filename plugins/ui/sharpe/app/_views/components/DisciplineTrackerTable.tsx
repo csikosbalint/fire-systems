@@ -140,9 +140,11 @@ export default function DisciplineTrackerTable({
                 {hasAlerts && (
                   <TableCell
                     className={`text-right ${
-                      delayDays !== undefined && delayDays > 4
-                        ? 'text-red-600 dark:text-red-400'
-                        : 'text-muted-foreground'
+                      delayDays === 0
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : delayDays !== undefined && delayDays > 4
+                          ? 'text-red-600 dark:text-red-400'
+                          : 'text-muted-foreground'
                     }`}
                   >
                     {pivotDelay ?? '—'}
