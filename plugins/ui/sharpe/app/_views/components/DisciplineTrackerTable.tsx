@@ -147,7 +147,7 @@ export default function DisciplineTrackerTable({
                           : 'text-muted-foreground'
                     }`}
                   >
-                    {pivotDelay ?? '—'}
+                    {delayDays === 0 ? 'No delay' : (pivotDelay ?? '—')}
                   </TableCell>
                 )}
                 {hasAlerts && (
