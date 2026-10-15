@@ -26,6 +26,7 @@ export default function DisciplineTracker() {
   const { initialCapital, pivots, results, calculation, chart } = adapter.usePresenter()
   const [capitalInput, setCapitalInput] = useState(String(initialCapital))
   const [pivotDate, setPivotDate] = useState(today)
+  const [maximumPivotDate, setMaximumPivotDate] = useState(today)
   const [alertDate, setAlertDate] = useState('')
   const [ticker, setTicker] = useState<Ticker | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
@@ -33,6 +34,14 @@ export default function DisciplineTracker() {
   useEffect(() => {
     setCapitalInput(String(initialCapital))
   }, [initialCapital])
+
+  useEffect(() => {
+    const refreshMaximumPivotDate = () => setMaximumPivotDate(today())
+
+    refreshMaximumPivotDate()
+    window.addEventListener('focus', refreshMaximumPivotDate)
+    return () => window.removeEventListener('focus', refreshMaximumPivotDate)
+  }, [])
 
   const saveInitialCapital = () => {
     const value = Number(capitalInput)
@@ -109,9 +118,13 @@ export default function DisciplineTracker() {
             Actual pivot
             <input
               type="date"
-              max={today()}
+              max={maximumPivotDate}
               value={pivotDate}
-              onChange={(event) => setPivotDate(event.target.value)}
+              onFocus={() => setMaximumPivotDate(today())}
+              onChange={(event) => {
+                setPivotDate(event.target.value)
+                setFormError(null)
+              }}
               aria-label="Actual pivot date"
               className="h-9 rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 dark:bg-input/30"
             />
