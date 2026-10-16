@@ -94,8 +94,11 @@ export function calculateTracker(
     actual.holdings.flatMap((holding, index) => {
       const alertDate = holding.pivot.alertDate
       const previousHolding = actual.holdings[index - 1]
-      // the delay affects the previous (already-closed) holding's exit, not this one
-      if (!alertDate || !previousHolding) return []
+      if (!alertDate) return []
+      // the first pivot has no earlier holding whose exit could be delayed
+      if (!previousHolding) {
+        return [[holding.pivot.id, { alertDate, actualDate: holding.pivot.date }]]
+      }
 
       const previousTickerPrices = pricesForTicker(pricesByTicker, previousHolding.pivot.ticker.ticker)
       const newTickerPrices = pricesForTicker(pricesByTicker, holding.pivot.ticker.ticker)
@@ -114,7 +117,7 @@ export function calculateTracker(
       const profitPercentDelta = (profitDelta / previousHolding.startValue) * 100
 
       return [[
-        previousHolding.pivot.id,
+        holding.pivot.id,
         {
           alertDate,
           actualDate: holding.pivot.date,
