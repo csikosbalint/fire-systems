@@ -44,8 +44,6 @@ export async function search(keyword: string): Promise<Ticker[]> {
   return ret
 }
 
-const ONE_DAY_MS = 24 * 60 * 60 * 1000
-
 export async function download({
   ticker,
   startDate,
@@ -58,8 +56,7 @@ export async function download({
   const { retrieve } = historicalDataPort()
   const requestedStartDate = startDate ?? new Date()
   if (!startDate) requestedStartDate.setFullYear(requestedStartDate.getFullYear() - 2)
-  // Yahoo treats the end date as exclusive, so ask for one day ahead to include today's bar
-  const requestedEndDate = endDate ?? new Date(Date.now() + ONE_DAY_MS)
+  const requestedEndDate = endDate ?? new Date()
 
   return retrieve({
     ticker: ticker.ticker,

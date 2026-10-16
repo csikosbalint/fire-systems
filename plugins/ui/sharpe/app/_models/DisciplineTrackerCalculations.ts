@@ -116,8 +116,7 @@ export function calculateTracker(
       return [[
         previousHolding.pivot.id,
         {
-          alertDate,
-          actualDate: holding.pivot.date,
+          alertDate: previousAlertExit.date,
           profitDelta,
           profitPercentDelta,
         },

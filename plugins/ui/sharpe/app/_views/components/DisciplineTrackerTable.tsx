@@ -103,12 +103,14 @@ export default function DisciplineTrackerTable({
             const holding = holdingsByPivot.get(pivot.id)
             const delayComparison = calculation.delayComparisons[pivot.id]
             // the delay comparison is attached to this (closed) holding's own exit date
-            const pivotDelay = delayComparison
-              ? formatHoldTime(delayComparison.alertDate, delayComparison.actualDate)
-              : undefined
-            const delayDays = delayComparison
-              ? elapsedDays(delayComparison.alertDate, delayComparison.actualDate)
-              : undefined
+            const pivotDelay =
+              holding && delayComparison
+                ? formatHoldTime(delayComparison.alertDate, holding.endDate)
+                : undefined
+            const delayDays =
+              holding && delayComparison
+                ? elapsedDays(delayComparison.alertDate, holding.endDate)
+                : undefined
             return (
               <TableRow key={pivot.id}>
                 <TableCell>{holding?.startDate ?? (isLoading ? 'Loading' : 'Unavailable')}</TableCell>
