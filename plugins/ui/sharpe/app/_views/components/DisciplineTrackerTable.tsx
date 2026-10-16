@@ -102,8 +102,7 @@ export default function DisciplineTrackerTable({
           {pivots.map((pivot) => {
             const holding = holdingsByPivot.get(pivot.id)
             const delayComparison = calculation.delayComparisons[pivot.id]
-            // the delay comparison is attached to this (closed) holding's own exit date
-            const pivotDelay = delayComparison
+                        const pivotDelay = delayComparison
               ? formatHoldTime(delayComparison.alertDate, delayComparison.actualDate)
               : undefined
             const delayDays = delayComparison
@@ -149,13 +148,13 @@ export default function DisciplineTrackerTable({
                   </TableCell>
                 )}
                 {hasAlerts && (
-                  <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitDelta) : ''}`}>
-                    {delayComparison ? currency.format(delayComparison.profitDelta) : '—'}
+                  <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitDelta ?? 0) : ''}`}>
+                    {delayComparison?.profitDelta !== undefined ? currency.format(delayComparison.profitDelta) : '—'}
                   </TableCell>
                 )}
                 {hasAlerts && (
-                  <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitPercentDelta) : ''}`}>
-                    {delayComparison
+                  <TableCell className={`text-right ${delayComparison ? resultClass(delayComparison.profitPercentDelta ?? 0) : ''}`}>
+                    {delayComparison?.profitPercentDelta !== undefined
                       ? percentage.format(delayComparison.profitPercentDelta / 100)
                       : '—'}
                   </TableCell>

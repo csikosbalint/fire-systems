@@ -25,8 +25,8 @@ export type HoldingPeriod = {
 export type PivotDelayComparison = {
   alertDate: string
   actualDate: string
-  profitDelta: number
-  profitPercentDelta: number
+  profitDelta?: number
+  profitPercentDelta?: number
 }
 
 export type PortfolioSummary = {
