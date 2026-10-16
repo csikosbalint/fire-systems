@@ -56,7 +56,7 @@ export async function download({
   const { retrieve } = historicalDataPort()
   const requestedStartDate = startDate ?? new Date()
   if (!startDate) requestedStartDate.setFullYear(requestedStartDate.getFullYear() - 2)
-  const requestedEndDate = endDate ?? new Date()
+  const requestedEndDate = endDate ?? new Date(Date.now() + 86_400_000)
 
   return retrieve({
     ticker: ticker.ticker,
