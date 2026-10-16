@@ -9,8 +9,13 @@ import DisciplineTrackerChart from './components/DisciplineTrackerChart'
 import DisciplineTrackerTable from './components/DisciplineTrackerTable'
 import TrackerTickerInput from './components/TrackerTickerInput'
 
+// Today's date as YYYY-MM-DD in the user's own timezone (toISOString would give the UTC date,
+// which can be yesterday or tomorrow compared to the calendar on the user's wall)
 function today(): string {
-  return new Date().toISOString().slice(0, 10)
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
 }
 
 const currency = new Intl.NumberFormat('en-IE', {
